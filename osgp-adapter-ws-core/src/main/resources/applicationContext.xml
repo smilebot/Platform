@@ -54,9 +54,9 @@
 	</bean>
 
     <sws:interceptors>
-        <ref bean="x509CertificateSubjectCnEndpointInterceptor"/>
+<!--         <ref bean="x509CertificateSubjectCnEndpointInterceptor"/> -->
         <ref bean="organisationIdentificationInterceptor"/>
-        <ref bean="organisationIdentificationInCertificateCnEndpointInterceptor"/>
+<!--         <ref bean="organisationIdentificationInCertificateCnEndpointInterceptor"/> -->
         <ref bean="payloadValidatingInterceptor"/>
         <ref bean="webServiceMonitorInterceptor" />
     </sws:interceptors>
