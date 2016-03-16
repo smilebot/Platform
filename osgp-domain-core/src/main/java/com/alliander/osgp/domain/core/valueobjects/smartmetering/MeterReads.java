@@ -10,45 +10,67 @@ package com.alliander.osgp.domain.core.valueobjects.smartmetering;
 import java.io.Serializable;
 import java.util.Date;
 
-public class MeterReads implements Serializable {
-
-    private static final long serialVersionUID = -156966569210717654L;
-
-    // TODO add status
+public abstract class MeterReads implements Serializable {
+    private static final long serialVersionUID = -297320204916085999L;
 
     private final Date logTime;
-    private final long activeEnergyImportTariffOne;
-    private final Long activeEnergyImportTariffTwo;
-    private final long activeEnergyExportTariffOne;
-    private final Long activeEnergyExportTariffTwo;
 
-    public MeterReads(Date logTime, long activeEnergyImportTariffOne, Long activeEnergyImportTariffTwo,
-            long activeEnergyExportTariffOne, Long activeEnergyExportTariffTwo) {
-        this.logTime = logTime;
+    private final Double activeEnergyImport;
+    private final Double activeEnergyExport;
+    private final Double activeEnergyImportTariffOne;
+    // may be null
+    private final Double activeEnergyImportTariffTwo;
+    private final Double activeEnergyExportTariffOne;
+    // may be null
+    private final Double activeEnergyExportTariffTwo;
+
+    protected MeterReads(final Date logTime, final Double activeEnergyImport, final Double activeEnergyExport,
+            final Double activeEnergyImportTariffOne, final Double activeEnergyImportTariffTwo,
+            final Double activeEnergyExportTariffOne, final Double activeEnergyExportTariffTwo) {
+        super();
+        this.logTime = new Date(logTime.getTime());
         this.activeEnergyImportTariffOne = activeEnergyImportTariffOne;
         this.activeEnergyImportTariffTwo = activeEnergyImportTariffTwo;
         this.activeEnergyExportTariffOne = activeEnergyExportTariffOne;
         this.activeEnergyExportTariffTwo = activeEnergyExportTariffTwo;
-    }
-
-    public long getActiveEnergyImportTariffOne() {
-        return this.activeEnergyImportTariffOne;
-    }
-
-    public Long getActiveEnergyImportTariffTwo() {
-        return this.activeEnergyImportTariffTwo;
-    }
-
-    public long getActiveEnergyExportTariffOne() {
-        return this.activeEnergyExportTariffOne;
-    }
-
-    public Long getActiveEnergyExportTariffTwo() {
-        return this.activeEnergyExportTariffTwo;
+        this.activeEnergyImport = activeEnergyImport;
+        this.activeEnergyExport = activeEnergyExport;
     }
 
     public Date getLogTime() {
-        return this.logTime;
+        return new Date(this.logTime.getTime());
     }
 
+    public Double getActiveEnergyImportTariffOne() {
+        return this.activeEnergyImportTariffOne;
+    }
+
+    public Double getActiveEnergyImportTariffTwo() {
+        return this.activeEnergyImportTariffTwo;
+    }
+
+    public Double getActiveEnergyExportTariffOne() {
+        return this.activeEnergyExportTariffOne;
+    }
+
+    public Double getActiveEnergyExportTariffTwo() {
+        return this.activeEnergyExportTariffTwo;
+    }
+
+    public Double getActiveEnergyImport() {
+        return this.activeEnergyImport;
+    }
+
+    public Double getActiveEnergyExport() {
+        return this.activeEnergyExport;
+    }
+
+    @Override
+    public String toString() {
+        return "MeterReads [logTime=" + this.logTime + ", activeEnergyImport=" + this.activeEnergyImport
+                + ", activeEnergyExport=" + this.activeEnergyExport + ", activeEnergyImportTariffOne="
+                + this.activeEnergyImportTariffOne + ", activeEnergyImportTariffTwo=" + this.activeEnergyImportTariffTwo
+                + ", activeEnergyExportTariffOne=" + this.activeEnergyExportTariffOne + ", activeEnergyExportTariffTwo="
+                + this.activeEnergyExportTariffTwo + "]";
+    }
 }

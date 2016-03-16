@@ -23,9 +23,6 @@ import com.alliander.osgp.adapter.ws.core.infra.jms.CommonRequestMessageType;
 import com.alliander.osgp.adapter.ws.core.infra.jms.CommonResponseMessageFinder;
 import com.alliander.osgp.domain.core.entities.Device;
 import com.alliander.osgp.domain.core.entities.Organisation;
-import com.alliander.osgp.domain.core.exceptions.NotAuthorizedException;
-import com.alliander.osgp.domain.core.exceptions.UnknownEntityException;
-import com.alliander.osgp.domain.core.exceptions.UnregisteredDeviceException;
 import com.alliander.osgp.domain.core.services.CorrelationIdProviderService;
 import com.alliander.osgp.domain.core.validation.Identification;
 import com.alliander.osgp.domain.core.valueobjects.Configuration;
@@ -57,16 +54,6 @@ public class ConfigurationManagementService {
         // Parameterless constructor required for transactions
     }
 
-    /**
-     * @param organisationIdentification
-     * @param deviceIdentification
-     * @param configuration
-     * @return correlationUid
-     * @throws UnknownEntityException
-     * @throws UnregisteredDeviceException
-     * @throws NotAuthorizedException
-     * @throws FunctionalException
-     */
     public String enqueueSetConfigurationRequest(@Identification final String organisationIdentification,
             @Identification final String deviceIdentification, @Valid final Configuration configuration,
             final DateTime scheduledTime) throws FunctionalException {
@@ -122,4 +109,30 @@ public class ConfigurationManagementService {
         return this.commonResponseMessageFinder.findMessage(correlationUid);
     }
 
+    public String enqueueSwitchConfigurationRequest(final String organisationIdentification,
+            final String deviceIdentification, final String configurationBank) throws FunctionalException {
+        final Organisation organisation = this.domainHelperService.findOrganisation(organisationIdentification);
+        final Device device = this.domainHelperService.findActiveDevice(deviceIdentification);
+
+        this.domainHelperService.isAllowed(organisation, device, DeviceFunction.SWITCH_CONFIGURATION_BANK);
+        this.domainHelperService.isInMaintenance(device);
+
+        LOGGER.debug("enqueueGetConfigurationRequest called with organisation {} and device {}",
+                organisationIdentification, deviceIdentification);
+
+        final String correlationUid = this.correlationIdProviderService.getCorrelationId(organisationIdentification,
+                deviceIdentification);
+
+        final CommonRequestMessage message = new CommonRequestMessage(
+                CommonRequestMessageType.SWITCH_CONFIGURATION_BANK, correlationUid, organisationIdentification,
+                deviceIdentification, configurationBank, null);
+
+        this.commonRequestMessageSender.send(message);
+
+        return correlationUid;
+    }
+
+    public ResponseMessage dequeueSwitchConfigurationResponse(final String correlationUid) throws OsgpException {
+        return this.commonResponseMessageFinder.findMessage(correlationUid);
+    }
 }

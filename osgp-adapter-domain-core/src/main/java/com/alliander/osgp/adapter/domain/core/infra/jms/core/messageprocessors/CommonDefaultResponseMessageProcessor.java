@@ -45,6 +45,8 @@ public class CommonDefaultResponseMessageProcessor extends OsgpCoreResponseMessa
         this.addMessageType(DeviceFunction.SET_EVENT_NOTIFICATIONS);
         this.addMessageType(DeviceFunction.START_SELF_TEST);
         this.addMessageType(DeviceFunction.STOP_SELF_TEST);
+        this.addMessageType(DeviceFunction.SWITCH_CONFIGURATION_BANK);
+        this.addMessageType(DeviceFunction.SWITCH_FIRMWARE);
     }
 
     @Override

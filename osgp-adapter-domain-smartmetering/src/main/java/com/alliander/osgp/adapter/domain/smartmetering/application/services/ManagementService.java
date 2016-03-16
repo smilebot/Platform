@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alliander.osgp.adapter.domain.smartmetering.application.mapping.ManagementMapper;
 import com.alliander.osgp.adapter.domain.smartmetering.infra.jms.core.OsgpCoreRequestMessageSender;
 import com.alliander.osgp.adapter.domain.smartmetering.infra.jms.ws.WebServiceResponseMessageSender;
+import com.alliander.osgp.domain.core.entities.SmartMeter;
 import com.alliander.osgp.domain.core.validation.Identification;
 import com.alliander.osgp.domain.core.valueobjects.smartmetering.EventMessageDataContainer;
 import com.alliander.osgp.domain.core.valueobjects.smartmetering.FindEventsQueryMessageDataContainer;
@@ -26,10 +27,6 @@ import com.alliander.osgp.shared.infra.jms.RequestMessage;
 import com.alliander.osgp.shared.infra.jms.ResponseMessage;
 import com.alliander.osgp.shared.infra.jms.ResponseMessageResultType;
 
-/**
- * @author OSGP
- *
- */
 @Service(value = "domainSmartMeteringManagementService")
 @Transactional(value = "transactionManager")
 public class ManagementService {
@@ -61,15 +58,14 @@ public class ManagementService {
                 organisationIdentification, deviceIdentification);
 
         // TODO: bypassing authorization, this should be fixed.
-        // Organisation organisation =
-        // this.findOrganisation(organisationIdentification);
-        // final Device device = this.findActiveDevice(deviceIdentification);
 
-        this.domainHelperService.ensureFunctionalExceptionForUnknownDevice(deviceIdentification);
+        final SmartMeter smartMeter = this.domainHelperService
+                .findSmartMeter(deviceIdentification);
 
         LOGGER.info("Sending request message to core.");
         final RequestMessage requestMessage = new RequestMessage(correlationUid, organisationIdentification,
-                deviceIdentification, this.managementMapper.map(findEventsQueryMessageDataContainer,
+                deviceIdentification, smartMeter.getIpAddress(), this.managementMapper.map(
+                        findEventsQueryMessageDataContainer,
                         com.alliander.osgp.dto.valueobjects.smartmetering.FindEventsQueryMessageDataContainer.class));
         this.osgpCoreRequestMessageSender.send(requestMessage, messageType);
     }

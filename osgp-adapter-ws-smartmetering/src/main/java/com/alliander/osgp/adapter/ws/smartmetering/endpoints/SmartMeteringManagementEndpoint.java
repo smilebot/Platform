@@ -21,7 +21,6 @@ import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
 
 import com.alliander.osgp.adapter.ws.endpointinterceptors.OrganisationIdentification;
-import com.alliander.osgp.adapter.ws.schema.smartmetering.common.AsyncResponse;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.management.DevicePage;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.management.FindEventsAsyncRequest;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.management.FindEventsAsyncResponse;
@@ -39,7 +38,6 @@ import com.alliander.osgp.shared.exceptionhandling.ComponentType;
 import com.alliander.osgp.shared.exceptionhandling.FunctionalException;
 import com.alliander.osgp.shared.exceptionhandling.FunctionalExceptionType;
 import com.alliander.osgp.shared.exceptionhandling.OsgpException;
-import com.alliander.osgp.shared.exceptionhandling.TechnicalException;
 
 //MethodConstraintViolationException is deprecated.
 //Will by replaced by equivalent functionality defined
@@ -47,7 +45,7 @@ import com.alliander.osgp.shared.exceptionhandling.TechnicalException;
 
 @SuppressWarnings("deprecation")
 @Endpoint
-public class SmartMeteringManagementEndpoint {
+public class SmartMeteringManagementEndpoint extends SmartMeteringEndpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SmartMeteringManagementEndpoint.class);
     private static final String NAMESPACE = "http://www.alliander.com/schemas/osgp/smartmetering/sm-management/2014/10";
@@ -73,10 +71,11 @@ public class SmartMeteringManagementEndpoint {
         LOGGER.info("Find events request for organisation: {} and device: {}.", organisationIdentification,
                 request.getDeviceIdentification());
 
-        // Create response.
-        final FindEventsAsyncResponse response = new FindEventsAsyncResponse();
-
+        FindEventsAsyncResponse response = null;
         try {
+            // Create response.
+            response = new FindEventsAsyncResponse();
+
             // Get the request parameters, make sure that date time are in UTC.
             final String deviceIdentification = request.getDeviceIdentification();
             final List<FindEventsQuery> findEventsQuery = request.getFindEventsQuery();
@@ -85,14 +84,12 @@ public class SmartMeteringManagementEndpoint {
                     deviceIdentification, this.managementMapper.mapAsList(findEventsQuery,
                             com.alliander.osgp.domain.core.valueobjects.smartmetering.FindEventsQuery.class));
 
-            final AsyncResponse asyncResponse = new AsyncResponse();
-            asyncResponse.setCorrelationUid(correlationUid);
-            asyncResponse.setDeviceIdentification(request.getDeviceIdentification());
-            response.setAsyncResponse(asyncResponse);
+            response.setCorrelationUid(correlationUid);
+            response.setDeviceIdentification(request.getDeviceIdentification());
+
         } catch (final Exception e) {
             this.handleException(e);
         }
-
         return response;
     }
 
@@ -103,22 +100,23 @@ public class SmartMeteringManagementEndpoint {
             @RequestPayload final FindEventsAsyncRequest request) throws OsgpException {
 
         LOGGER.info("Get find events response for organisation: {} and device: {}.", organisationIdentification,
-                request.getAsyncRequest().getDeviceIdentification());
+                request.getDeviceIdentification());
 
-        // Create response.
-        final FindEventsResponse response = new FindEventsResponse();
-
+        FindEventsResponse response = null;
         try {
+            // Create response.
+            response = new FindEventsResponse();
+
             // Get the request parameters, make sure that date time are in UTC.
-            final String deviceIdentification = request.getAsyncRequest().getDeviceIdentification();
-            final String correlationUid = request.getAsyncRequest().getCorrelationUid();
+            final String correlationUid = request.getCorrelationUid();
 
             final List<Event> events = this.managementService.findEventsByCorrelationUid(organisationIdentification,
-                    deviceIdentification, correlationUid);
+                    correlationUid);
 
             LOGGER.info("getFindEventsResponse() number of events: {}", events.size());
             for (final Event event : events) {
-                LOGGER.info("event.eventCode: {} event.timestamp: {}", event.getEventCode(), event.getTimestamp());
+                LOGGER.info("event.eventCode: {} event.timestamp: {} event.eventCounter: {}", event.getEventCode(),
+                        event.getTimestamp(), event.getEventCounter());
             }
             LOGGER.info("mapping events to schema type...");
             response.getEvents().addAll(
@@ -132,7 +130,6 @@ public class SmartMeteringManagementEndpoint {
         } catch (final Exception e) {
             this.handleException(e);
         }
-
         return response;
     }
 
@@ -143,9 +140,9 @@ public class SmartMeteringManagementEndpoint {
 
         LOGGER.info("Get Devices Request received from organisation: {}.", organisationIdentification);
 
-        final GetDevicesResponse response = new GetDevicesResponse();
-
+        GetDevicesResponse response = null;
         try {
+            response = new GetDevicesResponse();
             final Page<Device> page = this.managementService.findAllDevices(organisationIdentification,
                     request.getPage());
 
@@ -162,19 +159,7 @@ public class SmartMeteringManagementEndpoint {
         } catch (final Exception e) {
             this.handleException(e);
         }
-
         return response;
     }
 
-    private void handleException(final Exception e) throws OsgpException {
-        // Rethrow exception if it already is a functional or technical
-        // exception,
-        // otherwise throw new technical exception.
-        LOGGER.error("Exception occurred: ", e);
-        if (e instanceof OsgpException) {
-            throw (OsgpException) e;
-        } else {
-            throw new TechnicalException(COMPONENT_WS_SMART_METERING, e);
-        }
-    }
 }

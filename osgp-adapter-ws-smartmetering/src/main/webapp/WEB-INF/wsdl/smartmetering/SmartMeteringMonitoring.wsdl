@@ -118,6 +118,14 @@
         <wsdl:part element="smmon:ReadAlarmRegisterResponse" name="RetrieveAlarmRegisterResponse" />
     </wsdl:message>
 
+    <!-- PUSH NOTIFICATION ALARM -->
+    <wsdl:message name="RetrievePushNotificationAlarmRequest">
+        <wsdl:part element="smmon:RetrievePushNotificationAlarmRequest" name="RetrievePushNotificationAlarmRequest" />
+    </wsdl:message>
+    <wsdl:message name="RetrievePushNotificationAlarmResponse">
+        <wsdl:part element="smmon:RetrievePushNotificationAlarmResponse" name="RetrievePushNotificationAlarmResponse" />
+    </wsdl:message> 
+
     <!-- FOR USE IN BINDING -->
     <wsdl:message name="SoapHeaders">
         <wsdl:part name="org" element="common:OrganisationIdentification"/>
@@ -198,9 +206,14 @@
             <wsdl:input message="tns:ReadAlarmRegisterRequest" name="ReadAlarmRegisterRequest" />
             <wsdl:output message="tns:ReadAlarmRegisterAsyncResponse" name="ReadAlarmRegisterAsyncResponse" />
         </wsdl:operation>
-        <wsdl:operation name="GetReadAlarmRegisterReponse">
+        <wsdl:operation name="GetReadAlarmRegisterResponse">
             <wsdl:input message="tns:ReadAlarmRegisterAsyncRequest" name="ReadAlarmRegisterAsyncRequest" />
             <wsdl:output message="tns:ReadAlarmRegisterResponse" name="ReadAlarmRegisterResponse" />
+        </wsdl:operation>
+
+        <wsdl:operation name="RetrievePushNotificationAlarm">
+            <wsdl:input message="tns:RetrievePushNotificationAlarmRequest" name="RetrievePushNotificationAlarmRequest" />
+            <wsdl:output message="tns:RetrievePushNotificationAlarmResponse" name="RetrievePushNotificationAlarmResponse" />
         </wsdl:operation>
 
     </wsdl:portType>
@@ -323,7 +336,7 @@
             </wsdl:output>
         </wsdl:operation>
         
-        <wsdl:operation name="GetReadAlarmRegisterReponse">
+        <wsdl:operation name="GetReadAlarmRegisterResponse">
             <soap:operation soapAction="" />
             <wsdl:input name="ReadAlarmRegisterAsyncRequest">
                 <soap:header message="tns:SoapHeaders" part="org" use="literal" />
@@ -331,6 +344,19 @@
                 <soap:header message="tns:SoapHeaders" part="app" use="literal" />
             </wsdl:input>
             <wsdl:output name="ReadAlarmRegisterResponse">
+                <soap:body use="literal" />
+            </wsdl:output>
+        </wsdl:operation>
+
+        <wsdl:operation name="RetrievePushNotificationAlarm">
+            <soap:operation soapAction="" />
+            <wsdl:input name="RetrievePushNotificationAlarmRequest">
+                <soap:header message="tns:SoapHeaders" part="org" use="literal" />
+                <soap:header message="tns:SoapHeaders" part="user" use="literal" />
+                <soap:header message="tns:SoapHeaders" part="app" use="literal" />
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output name="RetrievePushNotificationAlarmResponse">
                 <soap:body use="literal" />
             </wsdl:output>
         </wsdl:operation>

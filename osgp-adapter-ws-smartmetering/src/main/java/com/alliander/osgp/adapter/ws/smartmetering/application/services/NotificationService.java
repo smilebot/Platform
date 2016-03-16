@@ -17,7 +17,6 @@ import org.springframework.validation.annotation.Validated;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.notification.Notification;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.notification.NotificationType;
 import com.alliander.osgp.adapter.ws.smartmetering.infra.ws.SendNotificationServiceClient;
-import com.alliander.osgp.domain.core.repositories.OrganisationRepository;
 import com.alliander.osgp.domain.core.validation.Identification;
 
 @Service(value = "wsSmartMeteringNotificationService")
@@ -31,9 +30,6 @@ public class NotificationService {
     private SendNotificationServiceClient sendNotificationServiceClient;
 
     @Autowired
-    private OrganisationRepository organisationRepository;
-
-    @Autowired
     private String notificationURL;
 
     public NotificationService() {
@@ -44,7 +40,8 @@ public class NotificationService {
             final String deviceIdentification, final String result, final String correlationUid, final String message,
             final NotificationType notificationType) {
 
-        LOGGER.info("sendNotification called with organisation {}", organisationIdentification);
+        LOGGER.info("sendNotification called with organisation: {}, correlationUid: {}, type: {}",
+                organisationIdentification, correlationUid, notificationType);
 
         final Notification notification = new Notification();
         // TODO message is null, unless an error occurred

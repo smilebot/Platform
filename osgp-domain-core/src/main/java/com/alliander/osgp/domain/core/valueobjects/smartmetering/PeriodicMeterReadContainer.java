@@ -10,24 +10,32 @@ package com.alliander.osgp.domain.core.valueobjects.smartmetering;
 import java.io.Serializable;
 import java.util.List;
 
-public class PeriodicMeterReadContainer implements Serializable {
+public class PeriodicMeterReadContainer implements Serializable, OsgpUnitResponse {
 
     private static final long serialVersionUID = -156966569210717657L;
     private final PeriodType periodType;
+    private final OsgpUnit osgpUnit;
 
-    private final List<MeterReads> periodicMeterReads;
+    private final List<PeriodicMeterReads> periodicMeterReads;
 
-    public PeriodicMeterReadContainer(final PeriodType periodType, List<MeterReads> periodicMeterReads) {
+    public PeriodicMeterReadContainer(final PeriodType periodType, final List<PeriodicMeterReads> periodicMeterReads,
+            final OsgpUnit osgpUnit) {
         this.periodicMeterReads = periodicMeterReads;
         this.periodType = periodType;
+        this.osgpUnit = osgpUnit;
     }
 
-    public List<MeterReads> getPeriodicMeterReads() {
+    public List<PeriodicMeterReads> getPeriodicMeterReads() {
         return this.periodicMeterReads;
     }
 
     public PeriodType getPeriodType() {
-        return periodType;
+        return this.periodType;
+    }
+
+    @Override
+    public final OsgpUnit getOsgpUnit() {
+        return this.osgpUnit;
     }
 
 }

@@ -35,12 +35,13 @@ public class EventConverter extends
 
         try {
             final com.alliander.osgp.domain.core.valueobjects.smartmetering.EventType eventType = com.alliander.osgp.domain.core.valueobjects.smartmetering.EventType
-                    .getValues()[source.getEventCode()];
+                    .getValue(source.getEventCode());
             final XMLGregorianCalendar timestamp = DatatypeFactory.newInstance().newXMLGregorianCalendar(
                     source.getTimestamp().toGregorianCalendar());
             final com.alliander.osgp.adapter.ws.schema.smartmetering.management.Event event = new com.alliander.osgp.adapter.ws.schema.smartmetering.management.Event();
             event.setEventType(EventType.fromValue(eventType.toString()));
             event.setTimestamp(timestamp);
+            event.setEventCounter(source.getEventCounter());
             return event;
         } catch (final DatatypeConfigurationException e) {
             LOGGER.error("DatatypeConfigurationException", e);
@@ -59,6 +60,6 @@ public class EventConverter extends
         final DateTime timestamp = new DateTime(source.getTimestamp().toGregorianCalendar().getTime());
         final Integer eventCode = com.alliander.osgp.domain.core.valueobjects.smartmetering.EventType.valueOf(
                 source.getEventType().toString()).ordinal();
-        return new Event(timestamp, eventCode);
+        return new Event(timestamp, eventCode, source.getEventCounter());
     }
 }

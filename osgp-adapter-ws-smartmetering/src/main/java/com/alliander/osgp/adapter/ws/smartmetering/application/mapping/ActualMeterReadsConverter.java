@@ -13,25 +13,26 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import ma.glasnost.orika.converter.BidirectionalConverter;
+import ma.glasnost.orika.CustomConverter;
 import ma.glasnost.orika.metadata.Type;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.alliander.osgp.adapter.ws.schema.smartmetering.monitoring.ActualMeterReadsResponse;
+import com.alliander.osgp.adapter.ws.schema.smartmetering.monitoring.EMeterValue;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.monitoring.ObjectFactory;
-import com.alliander.osgp.domain.core.valueobjects.smartmetering.MeterReads;
+import com.alliander.osgp.domain.core.valueobjects.smartmetering.ActualMeterReads;
 
 public class ActualMeterReadsConverter
         extends
-        BidirectionalConverter<MeterReads, com.alliander.osgp.adapter.ws.schema.smartmetering.monitoring.ActualMeterReadsResponse> {
+        CustomConverter<ActualMeterReads, com.alliander.osgp.adapter.ws.schema.smartmetering.monitoring.ActualMeterReadsResponse> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActualMeterReadsConverter.class);
 
     @Override
-    public com.alliander.osgp.adapter.ws.schema.smartmetering.monitoring.ActualMeterReadsResponse convertTo(
-            final MeterReads source,
-            final Type<com.alliander.osgp.adapter.ws.schema.smartmetering.monitoring.ActualMeterReadsResponse> destinationType) {
+    public ActualMeterReadsResponse convert(final ActualMeterReads source,
+            final Type<? extends ActualMeterReadsResponse> destinationType) {
 
         final com.alliander.osgp.adapter.ws.schema.smartmetering.monitoring.ActualMeterReadsResponse destination = new ObjectFactory()
                 .createActualMeterReadsResponse();
@@ -47,22 +48,26 @@ public class ActualMeterReadsConverter
         }
 
         destination.setLogTime(convertedDate);
-        destination.setActiveEnergyExportTariffOne(source.getActiveEnergyExportTariffOne());
-        destination.setActiveEnergyExportTariffTwo(source.getActiveEnergyExportTariffTwo());
-        destination.setActiveEnergyImportTariffOne(source.getActiveEnergyImportTariffOne());
-        destination.setActiveEnergyImportTariffTwo(source.getActiveEnergyImportTariffTwo());
+        destination.setActiveEnergyImport(this.eFromDouble(source.getActiveEnergyImport()));
+        // we try to check the unit
+        EMeterValue eMeterValue = destination.getActiveEnergyImport();
+        if (eMeterValue == null) {
+            eMeterValue = destination.getActiveEnergyImportTariffOne();
+        }
+        if (eMeterValue != null && !eMeterValue.getUnit().value().equals(source.getOsgpUnit().name())) {
+            throw new IllegalStateException(String.format("unit %s in destination differs from unit %s in source",
+                    eMeterValue.getUnit(), source.getOsgpUnit()));
+        }
+        destination.setActiveEnergyExport(this.eFromDouble(source.getActiveEnergyExport()));
+        destination.setActiveEnergyExportTariffOne(this.eFromDouble(source.getActiveEnergyExportTariffOne()));
+        destination.setActiveEnergyExportTariffTwo(this.eFromDouble(source.getActiveEnergyExportTariffTwo()));
+        destination.setActiveEnergyImportTariffOne(this.eFromDouble(source.getActiveEnergyImportTariffOne()));
+        destination.setActiveEnergyImportTariffTwo(this.eFromDouble(source.getActiveEnergyImportTariffTwo()));
 
         return destination;
     }
 
-    @Override
-    public MeterReads convertFrom(
-            final com.alliander.osgp.adapter.ws.schema.smartmetering.monitoring.ActualMeterReadsResponse source,
-            final Type<MeterReads> destinationType) {
-
-        return new MeterReads(source.getLogTime().toGregorianCalendar().getTime(),
-                source.getActiveEnergyImportTariffOne(), source.getActiveEnergyImportTariffTwo(),
-                source.getActiveEnergyExportTariffOne(), source.getActiveEnergyExportTariffTwo());
+    private EMeterValue eFromDouble(final Double d) {
+        return this.mapperFacade.map(d, EMeterValue.class);
     }
-
 }

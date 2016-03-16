@@ -36,11 +36,14 @@ import com.alliander.osgp.adapter.ws.core.infra.jms.CommonRequestMessageType;
 import com.alliander.osgp.adapter.ws.core.infra.jms.CommonResponseMessageFinder;
 import com.alliander.osgp.adapter.ws.shared.db.domain.repositories.writable.WritableDeviceAuthorizationRepository;
 import com.alliander.osgp.adapter.ws.shared.db.domain.repositories.writable.WritableDeviceRepository;
+import com.alliander.osgp.adapter.ws.shared.db.domain.repositories.writable.WritableSsldRepository;
 import com.alliander.osgp.domain.core.entities.Device;
 import com.alliander.osgp.domain.core.entities.DeviceAuthorization;
+import com.alliander.osgp.domain.core.entities.Ean;
 import com.alliander.osgp.domain.core.entities.Event;
 import com.alliander.osgp.domain.core.entities.Organisation;
 import com.alliander.osgp.domain.core.entities.ScheduledTask;
+import com.alliander.osgp.domain.core.entities.Ssld;
 import com.alliander.osgp.domain.core.exceptions.ArgumentNullOrEmptyException;
 import com.alliander.osgp.domain.core.exceptions.NotAuthorizedException;
 import com.alliander.osgp.domain.core.exceptions.UnknownEntityException;
@@ -117,6 +120,9 @@ public class DeviceManagementService {
     private WritableDeviceRepository writableDeviceRepository;
 
     @Autowired
+    private WritableSsldRepository writableSsldRepository;
+
+    @Autowired
     @Qualifier("wsCoreDeviceManagementNetManagementOrganisation")
     private String netManagementOrganisation;
 
@@ -147,11 +153,10 @@ public class DeviceManagementService {
         }
     }
 
-    // TODO remove
     @Transactional(value = "readableTransactionManager")
     public Page<DeviceLogItem> findDeviceMessages(@Identification final String organisationIdentification,
             @Identification final String deviceIdentification, @Min(value = 0) final int pageNumber)
-            throws FunctionalException {
+                    throws FunctionalException {
 
         LOGGER.debug("findOslpMessage called with organisation {}, device {} and pagenumber {}", new Object[] {
                 organisationIdentification, deviceIdentification, pageNumber });
@@ -224,10 +229,11 @@ public class DeviceManagementService {
      *            The page size
      * @param pageNumber
      *            the page to be returned.
+     * @param deviceFilter
+     *            the filter object
+     *
      * @return A page with devices
-     * @throws UnknownEntityException
-     * @throws NotAuthorizedException
-     * @throws ArgumentNullOrEmptyException
+     *
      * @throws FunctionalException
      */
     @Transactional(value = "transactionManager")
@@ -239,10 +245,8 @@ public class DeviceManagementService {
         Sort.Direction sortDir = Sort.Direction.DESC;
         String sortedBy = "creationTime";
         if (deviceFilter != null) {
-            if (!StringUtils.isEmpty(deviceFilter.getSortDir())) {
-                if (deviceFilter.getSortDir().contains("asc")) {
-                    sortDir = Sort.Direction.ASC;
-                }
+            if (!StringUtils.isEmpty(deviceFilter.getSortDir()) && deviceFilter.getSortDir().contains("asc")) {
+                sortDir = Sort.Direction.ASC;
             }
             if (!StringUtils.isEmpty(deviceFilter.getSortedBy())) {
                 sortedBy = deviceFilter.getSortedBy();
@@ -354,7 +358,7 @@ public class DeviceManagementService {
     @Transactional(value = "transactionManager")
     public String enqueueSetEventNotificationsRequest(@Identification final String organisationIdentification,
             @Identification final String deviceIdentification, final List<EventNotificationType> eventNotifications)
-            throws FunctionalException {
+                    throws FunctionalException {
 
         final Organisation organisation = this.domainHelperService.findOrganisation(organisationIdentification);
         final Device device = this.domainHelperService.findActiveDevice(deviceIdentification);
@@ -409,7 +413,7 @@ public class DeviceManagementService {
     }
 
     @Transactional(value = "writableTransactionManager")
-    public void updateDevice(@Identification final String organisationIdentification, @Valid final Device updateDevice)
+    public void updateDevice(@Identification final String organisationIdentification, @Valid final Ssld updateDevice)
             throws FunctionalException {
 
         final Device existingDevice = this.writableDeviceRepository.findByDeviceIdentification(updateDevice
@@ -421,7 +425,6 @@ public class DeviceManagementService {
                     new UnknownEntityException(Device.class, updateDevice.getDeviceIdentification()));
         }
 
-        // TODO add support for changes to device identification
         final List<DeviceAuthorization> owners = this.writableAuthorizationRepository.findByDeviceAndFunctionGroup(
                 existingDevice, DeviceFunctionGroup.OWNER);
 
@@ -445,9 +448,17 @@ public class DeviceManagementService {
                 updateDevice.getContainerNumber(), updateDevice.getContainerMunicipality(),
                 updateDevice.getGpsLatitude(), updateDevice.getGpsLongitude());
 
-        existingDevice.updateOutputSettings(updateDevice.receiveOutputSettings());
+        existingDevice.setActivated(updateDevice.isActivated());
 
-        this.writableDeviceRepository.save(existingDevice);
+        final Ssld ssld = this.writableSsldRepository.findOne(existingDevice.getId());
+        ssld.updateOutputSettings(updateDevice.receiveOutputSettings());
+        ssld.setEans(updateDevice.getEans());
+
+        for (final Ean ean : updateDevice.getEans()) {
+            ean.setDevice(ssld);
+        }
+
+        this.writableSsldRepository.save(ssld);
     }
 
     @Transactional(value = "writableTransactionManager")

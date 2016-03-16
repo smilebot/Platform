@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Smart Society Services B.V.
+ * Copyright 2014-2016 Smart Society Services B.V.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.  You may obtain a copy of the License at
  *
@@ -38,7 +38,9 @@ public class SecurityService {
                 PlatformFunction.GET_ORGANISATIONS, PlatformFunction.REMOVE_ORGANISATION,
                 PlatformFunction.CHANGE_ORGANISATION, PlatformFunction.GET_DEVICE_NO_OWNER,
                 PlatformFunction.GET_MESSAGES, PlatformFunction.FIND_DEVICES, PlatformFunction.SET_OWNER,
-                PlatformFunction.UPDATE_KEY, PlatformFunction.REVOKE_KEY, PlatformFunction.FIND_SCHEDULED_TASKS });
+                PlatformFunction.UPDATE_KEY, PlatformFunction.REVOKE_KEY, PlatformFunction.FIND_SCHEDULED_TASKS,
+                PlatformFunction.CREATE_MANUFACTURER, PlatformFunction.GET_MANUFACTURERS,
+                PlatformFunction.CHANGE_MANUFACTURER, PlatformFunction.REMOVE_MANUFACTURER });
 
         platformMapping.put(PlatformFunctionGroup.USER, new PlatformFunction[] { PlatformFunction.GET_ORGANISATIONS,
                 PlatformFunction.FIND_DEVICES });
@@ -52,10 +54,10 @@ public class SecurityService {
                 DeviceFunction.START_SELF_TEST, DeviceFunction.STOP_SELF_TEST, DeviceFunction.SET_LIGHT,
                 DeviceFunction.GET_DEVICE_AUTHORIZATION, DeviceFunction.SET_EVENT_NOTIFICATIONS,
                 DeviceFunction.GET_EVENT_NOTIFICATIONS, DeviceFunction.UPDATE_FIRMWARE,
-                DeviceFunction.GET_FIRMWARE_VERSION, DeviceFunction.SET_LIGHT_SCHEDULE,
+                DeviceFunction.GET_FIRMWARE_VERSION, DeviceFunction.SWITCH_FIRMWARE, DeviceFunction.SET_LIGHT_SCHEDULE,
                 DeviceFunction.SET_TARIFF_SCHEDULE, DeviceFunction.SET_CONFIGURATION, DeviceFunction.GET_CONFIGURATION,
-                DeviceFunction.GET_STATUS, DeviceFunction.GET_LIGHT_STATUS, DeviceFunction.GET_TARIFF_STATUS,
-                DeviceFunction.REMOVE_DEVICE, DeviceFunction.GET_ACTUAL_POWER_USAGE,
+                DeviceFunction.SWITCH_CONFIGURATION_BANK, DeviceFunction.GET_STATUS, DeviceFunction.GET_LIGHT_STATUS,
+                DeviceFunction.GET_TARIFF_STATUS, DeviceFunction.REMOVE_DEVICE, DeviceFunction.GET_ACTUAL_POWER_USAGE,
                 DeviceFunction.GET_POWER_USAGE_HISTORY, DeviceFunction.RESUME_SCHEDULE, DeviceFunction.SET_REBOOT,
                 DeviceFunction.SET_TRANSITION, DeviceFunction.UPDATE_KEY, DeviceFunction.REVOKE_KEY,
                 DeviceFunction.FIND_SCHEDULED_TASKS, DeviceFunction.ADD_METER });
@@ -74,7 +76,7 @@ public class SecurityService {
                 DeviceFunction.REVOKE_KEY });
 
         deviceMapping.put(DeviceFunctionGroup.FIRMWARE, new DeviceFunction[] { DeviceFunction.GET_DEVICE_AUTHORIZATION,
-                DeviceFunction.UPDATE_FIRMWARE, DeviceFunction.GET_FIRMWARE_VERSION });
+                DeviceFunction.UPDATE_FIRMWARE, DeviceFunction.GET_FIRMWARE_VERSION, DeviceFunction.SWITCH_FIRMWARE });
 
         deviceMapping.put(DeviceFunctionGroup.SCHEDULING, new DeviceFunction[] {
                 DeviceFunction.GET_DEVICE_AUTHORIZATION, DeviceFunction.SET_LIGHT_SCHEDULE, });
@@ -84,7 +86,7 @@ public class SecurityService {
 
         deviceMapping.put(DeviceFunctionGroup.CONFIGURATION, new DeviceFunction[] {
                 DeviceFunction.GET_DEVICE_AUTHORIZATION, DeviceFunction.SET_CONFIGURATION,
-                DeviceFunction.GET_CONFIGURATION });
+                DeviceFunction.GET_CONFIGURATION, DeviceFunction.SWITCH_CONFIGURATION_BANK });
 
         deviceMapping.put(DeviceFunctionGroup.MONITORING, new DeviceFunction[] {
                 DeviceFunction.GET_DEVICE_AUTHORIZATION, DeviceFunction.GET_ACTUAL_POWER_USAGE,
