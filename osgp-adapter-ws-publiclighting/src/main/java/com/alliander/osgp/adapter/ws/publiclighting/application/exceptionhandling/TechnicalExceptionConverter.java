@@ -23,8 +23,10 @@ public class TechnicalExceptionConverter extends CustomConverter<TechnicalExcept
         final TechnicalFault destination = new TechnicalFault();
         destination.setComponent(source.getComponentType().name());
         destination.setMessage(source.getMessage());
-        destination.setInnerException(source.getCause().getClass().getName());
-        destination.setInnerMessage(source.getCause().getMessage());
+        if (source.getCause() != null) {
+            destination.setInnerException(source.getCause().getClass().getName());
+            destination.setInnerMessage(source.getCause().getMessage());
+        }
 
         return destination;
     }

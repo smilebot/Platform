@@ -31,6 +31,7 @@ import com.alliander.osgp.domain.core.entities.Organisation;
 import com.alliander.osgp.domain.core.repositories.DeviceRepository;
 import com.alliander.osgp.domain.core.services.CorrelationIdProviderService;
 import com.alliander.osgp.domain.core.validation.Identification;
+import com.alliander.osgp.domain.core.valueobjects.DeviceFunction;
 import com.alliander.osgp.domain.core.valueobjects.smartmetering.Event;
 import com.alliander.osgp.domain.core.valueobjects.smartmetering.EventMessageDataContainer;
 import com.alliander.osgp.domain.core.valueobjects.smartmetering.FindEventsQuery;
@@ -40,6 +41,7 @@ import com.alliander.osgp.shared.exceptionhandling.FunctionalException;
 import com.alliander.osgp.shared.exceptionhandling.FunctionalExceptionType;
 import com.alliander.osgp.shared.exceptionhandling.OsgpException;
 import com.alliander.osgp.shared.exceptionhandling.TechnicalException;
+import com.alliander.osgp.shared.infra.jms.DeviceMessageMetadata;
 
 @Service(value = "wsSmartMeteringManagementService")
 @Transactional(value = "transactionManager")
@@ -70,11 +72,15 @@ public class ManagementService {
     }
 
     public String enqueueFindEventsRequest(final String organisationIdentification, final String deviceIdentification,
-            final List<FindEventsQuery> findEventsQueryList) throws FunctionalException {
+            final List<FindEventsQuery> findEventsQueryList, final int messagePriority) throws FunctionalException {
+
+        final Organisation organisation = this.domainHelperService.findOrganisation(organisationIdentification);
+        final Device device = this.domainHelperService.findActiveDevice(deviceIdentification);
+
+        this.domainHelperService.isAllowed(organisation, device, DeviceFunction.FIND_EVENTS);
 
         LOGGER.info("findEvents called with organisation {}", organisationIdentification);
 
-        this.domainHelperService.findOrganisation(organisationIdentification);
         for (final FindEventsQuery findEventsQuery : findEventsQueryList) {
             if (!findEventsQuery.getFrom().isBefore(findEventsQuery.getUntil())) {
                 throw new FunctionalException(FunctionalExceptionType.VALIDATION_ERROR,
@@ -85,9 +91,17 @@ public class ManagementService {
         final String correlationUid = this.correlationIdProviderService.getCorrelationId(organisationIdentification,
                 deviceIdentification);
 
-        final SmartMeteringRequestMessage message = new SmartMeteringRequestMessage(
-                SmartMeteringRequestMessageType.FIND_EVENTS, correlationUid, organisationIdentification,
-                deviceIdentification, new FindEventsQueryMessageDataContainer(findEventsQueryList));
+        final DeviceMessageMetadata deviceMessageMetadata = new DeviceMessageMetadata(deviceIdentification,
+                organisationIdentification, correlationUid, SmartMeteringRequestMessageType.FIND_EVENTS.toString(),
+                messagePriority);
+
+        // @formatter:off
+        final SmartMeteringRequestMessage message = new SmartMeteringRequestMessage.Builder()
+        .deviceMessageMetadata(deviceMessageMetadata)
+        .request(new FindEventsQueryMessageDataContainer(findEventsQueryList))
+        .build();
+        // @formatter:on
+
         this.smartMeteringRequestMessageSender.send(message);
 
         return correlationUid;
