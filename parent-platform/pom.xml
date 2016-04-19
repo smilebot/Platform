@@ -152,6 +152,13 @@
 
       <dependency>
         <groupId>com.alliander.osgp</groupId>
+        <artifactId>osgp-adapter-ws-controllableload</artifactId>
+        <version>${osgp.version}</version>
+        <classifier>classes</classifier>
+      </dependency>
+
+      <dependency>
+        <groupId>com.alliander.osgp</groupId>
         <artifactId>osgp-adapter-ws-core</artifactId>
         <version>${osgp.version}</version>
         <classifier>classes</classifier>
@@ -183,6 +190,14 @@
         <version>${osgp.version}</version>
         <classifier>classes</classifier>
       </dependency>
+
+      <dependency>
+        <groupId>com.alliander.osgp</groupId>
+        <artifactId>osgp-adapter-domain-controllableload</artifactId>
+        <version>${osgp.version}</version>
+        <classifier>classes</classifier>
+      </dependency>
+
       <dependency>
         <groupId>com.alliander.osgp</groupId>
         <artifactId>osgp-adapter-domain-core</artifactId>
