@@ -9,7 +9,7 @@
 -->
 <xsd:schema 
 	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-	xmlns:common="http://www.alliander.com/schemas/osgp/common/2016/04"			
+	xmlns:common="http://www.alliander.com/schemas/osgp/common/2014/10"			
 	xmlns:tns="http://www.alliander.com/schemas/osgp/controllableload/adhocmanagement/2016/04"
 	attributeFormDefault="unqualified"
 	elementFormDefault="qualified"
