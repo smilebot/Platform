@@ -31,10 +31,10 @@ import com.alliander.osgp.adapter.ws.schema.controllableload.adhocmanagement.Get
 import com.alliander.osgp.adapter.ws.schema.controllableload.adhocmanagement.GetStatusAsyncResponse;
 import com.alliander.osgp.adapter.ws.schema.controllableload.adhocmanagement.GetStatusRequest;
 import com.alliander.osgp.adapter.ws.schema.controllableload.adhocmanagement.GetStatusResponse;
-import com.alliander.osgp.adapter.ws.schema.controllableload.adhocmanagement.SwitchAsyncRequest;
-import com.alliander.osgp.adapter.ws.schema.controllableload.adhocmanagement.SwitchAsyncResponse;
-import com.alliander.osgp.adapter.ws.schema.controllableload.adhocmanagement.SwitchRequest;
-import com.alliander.osgp.adapter.ws.schema.controllableload.adhocmanagement.SwitchResponse;
+import com.alliander.osgp.adapter.ws.schema.controllableload.adhocmanagement.SwitchDeviceAsyncRequest;
+import com.alliander.osgp.adapter.ws.schema.controllableload.adhocmanagement.SwitchDeviceAsyncResponse;
+import com.alliander.osgp.adapter.ws.schema.controllableload.adhocmanagement.SwitchDeviceRequest;
+import com.alliander.osgp.adapter.ws.schema.controllableload.adhocmanagement.SwitchDeviceResponse;
 import com.alliander.osgp.adapter.ws.schema.controllableload.common.AsyncResponse;
 import com.alliander.osgp.adapter.ws.schema.controllableload.common.OsgpResultType;
 import com.alliander.osgp.domain.core.entities.Device;
@@ -103,15 +103,15 @@ public class ControllableLoadAdHocManagementEndpoint {
 
     // === SWITCH ===
 
-    @PayloadRoot(localPart = "SwitchRequest", namespace = NAMESPACE)
+    @PayloadRoot(localPart = "SwitchDeviceRequest", namespace = NAMESPACE)
     @ResponsePayload
-    public SwitchAsyncResponse switchRelays(@OrganisationIdentification final String organisationIdentification,
-            @RequestPayload final SwitchRequest request) throws OsgpException {
+    public SwitchDeviceAsyncResponse switchDevice(@OrganisationIdentification final String organisationIdentification,
+            @RequestPayload final SwitchDeviceRequest request) throws OsgpException {
 
-        LOGGER.info("Switch Request received from organisation: {} for device: {}.", organisationIdentification,
+        LOGGER.info("Switch Device Request received from organisation: {} for device: {}.", organisationIdentification,
                 request.getDeviceIdentification());
 
-        final SwitchAsyncResponse response = new SwitchAsyncResponse();
+        final SwitchDeviceAsyncResponse response = new SwitchDeviceAsyncResponse();
 
         try {
             final List<LightValue> lightValues = new ArrayList<>();
@@ -137,15 +137,16 @@ public class ControllableLoadAdHocManagementEndpoint {
         return response;
     }
 
-    @PayloadRoot(localPart = "SwitchAsyncRequest", namespace = NAMESPACE)
+    @PayloadRoot(localPart = "SwitchDeviceAsyncRequest", namespace = NAMESPACE)
     @ResponsePayload
-    public SwitchResponse getSwitchResponse(@OrganisationIdentification final String organisationIdentification,
-            @RequestPayload final SwitchAsyncRequest request) throws OsgpException {
+    public SwitchDeviceResponse getSwitchDeviceResponse(
+            @OrganisationIdentification final String organisationIdentification,
+            @RequestPayload final SwitchDeviceAsyncRequest request) throws OsgpException {
 
         LOGGER.info("Get Set Light Response received from organisation: {} with correlationUid: {}.",
                 organisationIdentification, request.getAsyncRequest().getCorrelationUid());
 
-        final SwitchResponse response = new SwitchResponse();
+        final SwitchDeviceResponse response = new SwitchDeviceResponse();
 
         try {
             final ResponseMessage message = this.adHocManagementService

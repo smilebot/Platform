@@ -34,31 +34,31 @@
         </wsdl:part>
     </wsdl:message>
     
-    <wsdl:message name="SwitchHeader">
+    <wsdl:message name="SwitchDeviceHeader">
         <wsdl:part element="common:OrganisationIdentification" name="OrganisationIdentification" />     
         <wsdl:part element="common:UserName" name="UserName" />
         <wsdl:part element="common:ApplicationName" name="ApplicationName" />
     </wsdl:message>
-    <wsdl:message name="SwitchRequest">
-        <wsdl:part element="ahman:SwitchRequest" name="SwitchRequest">
+    <wsdl:message name="SwitchDeviceRequest">
+        <wsdl:part element="ahman:SwitchDeviceRequest" name="SwitchDeviceRequest">
         </wsdl:part>
     </wsdl:message>
-    <wsdl:message name="SwitchAsyncResponse">
-        <wsdl:part element="ahman:SwitchAsyncResponse" name="SwitchAsyncResponse">
+    <wsdl:message name="SwitchDeviceAsyncResponse">
+        <wsdl:part element="ahman:SwitchDeviceAsyncResponse" name="SwitchDeviceAsyncResponse">
         </wsdl:part>
     </wsdl:message>
     
-    <wsdl:message name="SwitchAsyncHeader">
+    <wsdl:message name="SwitchDeviceAsyncHeader">
         <wsdl:part element="common:OrganisationIdentification" name="OrganisationIdentification" />     
         <wsdl:part element="common:UserName" name="UserName" />
         <wsdl:part element="common:ApplicationName" name="ApplicationName" />
     </wsdl:message>
-    <wsdl:message name="SwitchAsyncRequest">
-        <wsdl:part element="ahman:SwitchAsyncRequest" name="SwitchAsyncRequest">
+    <wsdl:message name="SwitchDeviceAsyncRequest">
+        <wsdl:part element="ahman:SwitchDeviceAsyncRequest" name="SwitchDeviceAsyncRequest">
         </wsdl:part>
     </wsdl:message>
-    <wsdl:message name="SwitchResponse">
-        <wsdl:part element="ahman:SwitchResponse" name="SwitchResponse">
+    <wsdl:message name="SwitchDeviceResponse">
+        <wsdl:part element="ahman:SwitchDeviceResponse" name="SwitchDeviceResponse">
         </wsdl:part>
     </wsdl:message>
     
@@ -100,16 +100,16 @@
             </wsdl:output>
         </wsdl:operation>
         
-        <wsdl:operation name="Switch">
-            <wsdl:input message="tns:SwitchRequest" name="SwitchRequest"> 
+        <wsdl:operation name="SwitchDevice">
+            <wsdl:input message="tns:SwitchDeviceRequest" name="SwitchDeviceRequest"> 
             </wsdl:input>
-            <wsdl:output message="tns:SwitchAsyncResponse" name="SwitchAsyncResponse">
+            <wsdl:output message="tns:SwitchDeviceAsyncResponse" name="SwitchDeviceAsyncResponse">
             </wsdl:output>      
         </wsdl:operation>
-        <wsdl:operation name="GetSwitchResponse">
-            <wsdl:input message="tns:SwitchAsyncRequest" name="SwitchAsyncRequest">
+        <wsdl:operation name="GetSwitchDeviceResponse">
+            <wsdl:input message="tns:SwitchDeviceAsyncRequest" name="SwitchDeviceAsyncRequest">
             </wsdl:input>
-            <wsdl:output message="tns:SwitchResponse" name="SwitchResponse">
+            <wsdl:output message="tns:SwitchDeviceResponse" name="SwitchDeviceResponse">
             </wsdl:output>
         </wsdl:operation>
         
@@ -145,27 +145,27 @@
             </wsdl:output>
         </wsdl:operation>
         
-        <wsdl:operation name="Switch">
+        <wsdl:operation name="SwitchDevice">
             <soap:operation soapAction="" />
-            <wsdl:input name="SwitchRequest">
-                <soap:header message="tns:SwitchHeader" part="OrganisationIdentification" use="literal" />
-                <soap:header message="tns:SwitchHeader" part="UserName" use="literal" />
-                <soap:header message="tns:SwitchHeader" part="ApplicationName" use="literal" />
+            <wsdl:input name="SwitchDeviceRequest">
+                <soap:header message="tns:SwitchDeviceHeader" part="OrganisationIdentification" use="literal" />
+                <soap:header message="tns:SwitchDeviceHeader" part="UserName" use="literal" />
+                <soap:header message="tns:SwitchDeviceHeader" part="ApplicationName" use="literal" />
                 <soap:body use="literal" />
             </wsdl:input>
-            <wsdl:output name="SwitchAsyncResponse">
+            <wsdl:output name="SwitchDeviceAsyncResponse">
                 <soap:body use="literal" />
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="GetSwitchResponse">
+        <wsdl:operation name="GetSwitchDeviceResponse">
             <soap:operation soapAction="" />
-            <wsdl:input name="SwitchAsyncRequest">
-                <soap:header message="tns:SwitchAsyncHeader" part="OrganisationIdentification" use="literal" />
-                <soap:header message="tns:SwitchAsyncHeader" part="UserName" use="literal" />
-                <soap:header message="tns:SwitchAsyncHeader" part="ApplicationName" use="literal" />
+            <wsdl:input name="SwitchDeviceAsyncRequest">
+                <soap:header message="tns:SwitchDeviceAsyncHeader" part="OrganisationIdentification" use="literal" />
+                <soap:header message="tns:SwitchDeviceAsyncHeader" part="UserName" use="literal" />
+                <soap:header message="tns:SwitchDeviceAsyncHeader" part="ApplicationName" use="literal" />
                 <soap:body use="literal" />
             </wsdl:input>
-            <wsdl:output name="SwitchResponse">
+            <wsdl:output name="SwitchDeviceResponse">
                 <soap:body use="literal" />
             </wsdl:output>
         </wsdl:operation>
