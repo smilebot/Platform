@@ -18,27 +18,9 @@ public class ConfigurationMapper extends ConfigurableMapper {
     @Override
     public void configure(final MapperFactory mapperFactory) {
 
-        // domain value object -> dto value object
-        mapperFactory
-        .classMap(com.alliander.osgp.domain.core.valueobjects.smartmetering.SpecialDaysRequest.class,
-                com.alliander.osgp.dto.valueobjects.smartmetering.SpecialDaysRequest.class).byDefault()
-                .register();
-
-        mapperFactory.getConverterFactory().registerConverter(new AlarmNotificationsConverter());
-        mapperFactory.getConverterFactory().registerConverter(new ConfigurationObjectConverter());
-        mapperFactory.getConverterFactory().registerConverter(new CosemObisCodeConverter());
-        mapperFactory.getConverterFactory().registerConverter(new SendDestinationAndMethodConverter());
-        mapperFactory.getConverterFactory().registerConverter(new CosemDateConverter());
-        mapperFactory.getConverterFactory().registerConverter(new CosemTimeConverter());
+        // This mapper needs a converter for CosemDateTime objects because
+        // Orika sometimes throws an exception if mapping by default is tried
         mapperFactory.getConverterFactory().registerConverter(new CosemDateTimeConverter(this));
-        mapperFactory.getConverterFactory().registerConverter(new WindowElementConverter(this));
-        mapperFactory.getConverterFactory().registerConverter(new CosemObjectDefinitionConverter(this));
-        mapperFactory.getConverterFactory().registerConverter(new PushSetupAlarmConverter());
-        mapperFactory.getConverterFactory().registerConverter(new PushSetupSmsConverter());
-        mapperFactory.getConverterFactory().registerConverter(new ActivityCalendarConverter());
-        mapperFactory.getConverterFactory().registerConverter(new AdministrativeStatusConverter());
-        mapperFactory.getConverterFactory().registerConverter(new KeySetConverter());
-        mapperFactory.getConverterFactory().registerConverter(new SpecialDaysDataConverter());
-        mapperFactory.getConverterFactory().registerConverter(new SpecialDayConverter());
+
     }
 }

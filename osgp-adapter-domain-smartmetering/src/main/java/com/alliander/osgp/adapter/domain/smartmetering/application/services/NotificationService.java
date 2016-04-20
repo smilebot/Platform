@@ -7,14 +7,16 @@
  */
 package com.alliander.osgp.adapter.domain.smartmetering.application.services;
 
+import ma.glasnost.orika.MapperFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alliander.osgp.adapter.domain.smartmetering.application.mapping.NotificationMapper;
 import com.alliander.osgp.adapter.domain.smartmetering.infra.jms.ws.WebServiceResponseMessageSender;
-import com.alliander.osgp.dto.valueobjects.smartmetering.PushNotificationAlarm;
+import com.alliander.osgp.domain.core.valueobjects.smartmetering.PushNotificationAlarm;
+import com.alliander.osgp.dto.valueobjects.smartmetering.PushNotificationAlarmDto;
 import com.alliander.osgp.shared.infra.jms.DeviceMessageMetadata;
 import com.alliander.osgp.shared.infra.jms.ResponseMessage;
 import com.alliander.osgp.shared.infra.jms.ResponseMessageResultType;
@@ -25,19 +27,18 @@ public class NotificationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationService.class);
 
     @Autowired
-    private NotificationMapper notificationMapper;
+    private MapperFactory mapperFactory;
 
     @Autowired
     private WebServiceResponseMessageSender webServiceResponseMessageSender;
 
     public void handlePushNotificationAlarm(final DeviceMessageMetadata deviceMessageMetadata,
-            final PushNotificationAlarm pushNotificationAlarm) {
+            final PushNotificationAlarmDto pushNotificationAlarm) {
 
         LOGGER.info("handlePushNotificationAlarm for MessageType: {}", deviceMessageMetadata.getMessageType());
 
-        final com.alliander.osgp.domain.core.valueobjects.smartmetering.PushNotificationAlarm pushNotificationAlarmDomain = this.notificationMapper
-                .map(pushNotificationAlarm,
-                        com.alliander.osgp.domain.core.valueobjects.smartmetering.PushNotificationAlarm.class);
+        final PushNotificationAlarm pushNotificationAlarmDomain = this.mapperFactory.getMapperFacade().map(
+                pushNotificationAlarm, PushNotificationAlarm.class);
 
         /*
          * Send the push notification alarm as a response message to the web
@@ -48,6 +49,6 @@ public class NotificationService {
                 new ResponseMessage(deviceMessageMetadata.getCorrelationUid(), deviceMessageMetadata
                         .getOrganisationIdentification(), deviceMessageMetadata.getDeviceIdentification(),
                         ResponseMessageResultType.OK, null, pushNotificationAlarmDomain, deviceMessageMetadata
-                        .getMessagePriority()), deviceMessageMetadata.getMessageType());
+                                .getMessagePriority()), deviceMessageMetadata.getMessageType());
     }
 }
