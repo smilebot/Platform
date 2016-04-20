@@ -57,7 +57,7 @@ public class ControllableLoadAdHocManagementEndpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ControllableLoadAdHocManagementEndpoint.class);
     private static final String NAMESPACE = "http://www.alliander.com/schemas/osgp/controllableload/adhocmanagement/2014/10";
-    private static final ComponentType COMPONENT_WS_PUBLIC_LIGHTING = ComponentType.WS_PUBLIC_LIGHTING;
+    private static final ComponentType COMPONENT_WS_CONTROLLABLE_LOAD = ComponentType.WS_CONTROLLABLE_LOAD;
 
     private static final String EXCEPTION_OCCURRED = "Exception Occurred";
 
@@ -66,8 +66,8 @@ public class ControllableLoadAdHocManagementEndpoint {
 
     @Autowired
     public ControllableLoadAdHocManagementEndpoint(
-            @Qualifier("wsPublicLightingAdHocManagementService") final AdHocManagementService adHocManagementService,
-            @Qualifier("publicLightingAdhocManagementMapper") final AdHocManagementMapper adHocManagementMapper) {
+            @Qualifier("wsControllableLoadAdHocManagementService") final AdHocManagementService adHocManagementService,
+            @Qualifier("controllableLoadAdhocManagementMapper") final AdHocManagementMapper adHocManagementMapper) {
         this.adHocManagementService = adHocManagementService;
         this.adHocManagementMapper = adHocManagementMapper;
     }
@@ -92,7 +92,7 @@ public class ControllableLoadAdHocManagementEndpoint {
             response.setDevicePage(devicePage);
         } catch (final MethodConstraintViolationException e) {
             LOGGER.error(EXCEPTION_OCCURRED, e);
-            throw new FunctionalException(FunctionalExceptionType.VALIDATION_ERROR, COMPONENT_WS_PUBLIC_LIGHTING,
+            throw new FunctionalException(FunctionalExceptionType.VALIDATION_ERROR, COMPONENT_WS_CONTROLLABLE_LOAD,
                     new ValidationException(e.getConstraintViolations()));
         } catch (final Exception e) {
             this.handleException(e);
@@ -128,7 +128,7 @@ public class ControllableLoadAdHocManagementEndpoint {
             response.setAsyncResponse(asyncResponse);
         } catch (final MethodConstraintViolationException e) {
             LOGGER.error(EXCEPTION_OCCURRED, e);
-            throw new FunctionalException(FunctionalExceptionType.VALIDATION_ERROR, COMPONENT_WS_PUBLIC_LIGHTING,
+            throw new FunctionalException(FunctionalExceptionType.VALIDATION_ERROR, COMPONENT_WS_CONTROLLABLE_LOAD,
                     new ValidationException(e.getConstraintViolations()));
         } catch (final Exception e) {
             this.handleException(e);
@@ -226,7 +226,7 @@ public class ControllableLoadAdHocManagementEndpoint {
         if (e instanceof OsgpException) {
             throw (OsgpException) e;
         } else {
-            throw new TechnicalException(COMPONENT_WS_PUBLIC_LIGHTING, e);
+            throw new TechnicalException(COMPONENT_WS_CONTROLLABLE_LOAD, e);
         }
     }
 }

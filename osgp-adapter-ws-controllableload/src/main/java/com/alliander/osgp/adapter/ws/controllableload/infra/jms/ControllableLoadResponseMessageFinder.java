@@ -18,7 +18,7 @@ import org.springframework.jms.core.JmsTemplate;
 import com.alliander.osgp.shared.infra.jms.BaseResponseMessageFinder;
 
 /**
- * Class for retrieving response messages from the public lighting responses
+ * Class for retrieving response messages from the controllable load responses
  * queue by correlation UID.
  */
 public class ControllableLoadResponseMessageFinder extends BaseResponseMessageFinder {
@@ -29,17 +29,17 @@ public class ControllableLoadResponseMessageFinder extends BaseResponseMessageFi
     private static final Logger LOGGER = LoggerFactory.getLogger(ControllableLoadResponseMessageFinder.class);
 
     /**
-     * Autowired JMS template for OSGP domain public lighting responses queue.
+     * Autowired JMS template for OSGP domain controllable load responses queue.
      */
     @Autowired
-    @Qualifier("wsPublicLightingIncomingResponsesJmsTemplate")
-    private JmsTemplate publicLightingResponsesJmsTemplate;
+    @Qualifier("wsControllableLoadIncomingResponsesJmsTemplate")
+    private JmsTemplate controllableLoadResponsesJmsTemplate;
 
     @Override
     protected ObjectMessage receiveObjectMessage(final String correlationUid) {
         LOGGER.info("Trying to find message with correlationUID: {}", correlationUid);
 
-        return (ObjectMessage) this.publicLightingResponsesJmsTemplate
+        return (ObjectMessage) this.controllableLoadResponsesJmsTemplate
                 .receiveSelected(this.getJmsCorrelationId(correlationUid));
     }
 }

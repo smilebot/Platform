@@ -27,7 +27,7 @@ import com.alliander.osgp.shared.exceptionhandling.FunctionalExceptionType;
 @Service
 public class DomainHelperService {
 
-    private static ComponentType COMPONENT_TYPE = ComponentType.WS_PUBLIC_LIGHTING;
+    private static ComponentType COMPONENT_TYPE = ComponentType.WS_CONTROLLABLE_LOAD;
 
     @Autowired
     private DeviceDomainService deviceDomainService;

@@ -23,7 +23,7 @@ import org.springframework.jms.core.MessageCreator;
 import com.alliander.osgp.shared.infra.jms.Constants;
 
 /**
- * Class for sending public lighting request messages to a queue
+ * Class for sending controllable load request messages to a queue
  */
 public class ControllableLoadRequestMessageSender {
     /**
@@ -45,7 +45,7 @@ public class ControllableLoadRequestMessageSender {
      *            The ControllableLoadRequestMessage request message to send.
      */
     public void send(final ControllableLoadRequestMessage requestMessage) {
-        LOGGER.debug("Sending public lighting request message to the queue");
+        LOGGER.debug("Sending controllable load request message to the queue");
 
         if (requestMessage.getMessageType() == null) {
             LOGGER.error("MessageType is null");
@@ -68,14 +68,14 @@ public class ControllableLoadRequestMessageSender {
     }
 
     /**
-     * Method for sending a request message to the public lighting requests
+     * Method for sending a request message to the controllable load requests
      * queue
      *
      * @param requestMessage
      *            The ControllableLoadequestMessage request message to send.
      */
     private void sendMessage(final ControllableLoadRequestMessage requestMessage) {
-        LOGGER.info("Sending message to the public lighting requests queue");
+        LOGGER.info("Sending message to the controllable load requests queue");
 
         this.controllableLoadRequestsJmsTemplate.send(new MessageCreator() {
 

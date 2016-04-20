@@ -40,7 +40,7 @@ public class MessagingConfig {
     private static final String PROPERTY_NAME_JMS_DEFAULT_MAXIMUM_REDELIVERY_DELAY = "jms.default.maximum.redelivery.delay";
     private static final String PROPERTY_NAME_JMS_DEFAULT_REDELIVERY_DELAY = "jms.default.redelivery.delay";
 
-    // JMS Settings: Public Lighting logging
+    // JMS Settings: Controllable Load logging
     private static final String PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_LOGGING_QUEUE = "jms.controllableload.logging.queue";
     private static final String PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_LOGGING_EXPLICIT_QOS_ENABLED = "jms.controllableload.logging.explicit.qos.enabled";
     private static final String PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_LOGGING_DELIVERY_PERSISTENT = "jms.controllableload.logging.delivery.persistent";
@@ -53,7 +53,7 @@ public class MessagingConfig {
     private static final String PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_LOGGING_BACK_OFF_MULTIPLIER = "jms.controllableload.logging.back.off.multiplier";
     private static final String PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_LOGGING_USE_EXPONENTIAL_BACK_OFF = "jms.controllableload.logging.use.exponential.back.off";
 
-    // JMS Settings: Public Lighting requests
+    // JMS Settings: Controllable Load requests
     private static final String PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_REQUESTS_QUEUE = "jms.controllableload.requests.queue";
     private static final String PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_REQUESTS_EXPLICIT_QOS_ENABLED = "jms.controllableload.requests.explicit.qos.enabled";
     private static final String PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_RESPONSES_TIME_TO_LIVE = "jms.controllableload.responses.time.to.live";
@@ -68,7 +68,7 @@ public class MessagingConfig {
     private static final String PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_REQUESTS_BACK_OFF_MULTIPLIER = "jms.controllableload.requests.back.off.multiplier";
     private static final String PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_REQUESTS_USE_EXPONENTIAL_BACK_OFF = "jms.controllableload.requests.use.exponential.back.off";
 
-    // JMS Settings: Public Lighting responses
+    // JMS Settings: Controllable Load responses
     private static final String PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_RESPONSES_QUEUE = "jms.controllableload.responses.queue";
     private static final String PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_RESPONSES_EXPLICIT_QOS_ENABLED = "jms.controllableload.responses.explicit.qos.enabled";
     private static final String PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_RESPONSES_DELIVERY_PERSISTENT = "jms.controllableload.responses.delivery.persistent";
@@ -106,9 +106,9 @@ public class MessagingConfig {
     public RedeliveryPolicyMap redeliveryPolicyMap() {
         final RedeliveryPolicyMap redeliveryPolicyMap = new RedeliveryPolicyMap();
         redeliveryPolicyMap.setDefaultEntry(this.defaultRedeliveryPolicy());
-        redeliveryPolicyMap.put(this.publicLightingRequestsQueue(), this.publicLightingRequestsRedeliveryPolicy());
-        redeliveryPolicyMap.put(this.publicLightingResponsesQueue(), this.publicLightingResponsesRedeliveryPolicy());
-        redeliveryPolicyMap.put(this.publicLightingLoggingQueue(), this.publicLightingLoggingRedeliveryPolicy());
+        redeliveryPolicyMap.put(this.controllableLoadRequestsQueue(), this.controllableLoadRequestsRedeliveryPolicy());
+        redeliveryPolicyMap.put(this.controllableLoadResponsesQueue(), this.controllableLoadResponsesRedeliveryPolicy());
+        redeliveryPolicyMap.put(this.controllableLoadLoggingQueue(), this.controllableLoadLoggingRedeliveryPolicy());
         return redeliveryPolicyMap;
     }
 
@@ -127,10 +127,10 @@ public class MessagingConfig {
         return redeliveryPolicy;
     }
 
-    // === JMS SETTINGS: PUBLIC LIGHTING REQUESTS ===
+    // === JMS SETTINGS: CONTROLLABLE LOAD REQUESTS ===
 
     @Bean
-    public ActiveMQDestination publicLightingRequestsQueue() {
+    public ActiveMQDestination controllableLoadRequestsQueue() {
         return new ActiveMQQueue(
                 this.environment.getRequiredProperty(PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_REQUESTS_QUEUE));
     }
@@ -138,10 +138,10 @@ public class MessagingConfig {
     /**
      * @return
      */
-    @Bean(name = "wsPublicLightingOutgoingRequestsJmsTemplate")
-    public JmsTemplate publicLightingRequestsJmsTemplate() {
+    @Bean(name = "wsControllableLoadOutgoingRequestsJmsTemplate")
+    public JmsTemplate controllableLoadRequestsJmsTemplate() {
         final JmsTemplate jmsTemplate = new JmsTemplate();
-        jmsTemplate.setDefaultDestination(this.publicLightingRequestsQueue());
+        jmsTemplate.setDefaultDestination(this.controllableLoadRequestsQueue());
         // Enable the use of deliveryMode, priority, and timeToLive
         jmsTemplate.setExplicitQosEnabled(Boolean.parseBoolean(this.environment
                 .getRequiredProperty(PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_REQUESTS_EXPLICIT_QOS_ENABLED)));
@@ -154,7 +154,7 @@ public class MessagingConfig {
     }
 
     @Bean
-    public RedeliveryPolicy publicLightingRequestsRedeliveryPolicy() {
+    public RedeliveryPolicy controllableLoadRequestsRedeliveryPolicy() {
         final RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
         redeliveryPolicy.setInitialRedeliveryDelay(Long.parseLong(this.environment
                 .getRequiredProperty(PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_REQUESTS_INITIAL_REDELIVERY_DELAY)));
@@ -164,7 +164,7 @@ public class MessagingConfig {
                 .getRequiredProperty(PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_REQUESTS_MAXIMUM_REDELIVERY_DELAY)));
         redeliveryPolicy.setRedeliveryDelay(Long.parseLong(
                 this.environment.getRequiredProperty(PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_REQUESTS_REDELIVERY_DELAY)));
-        redeliveryPolicy.setDestination(this.publicLightingRequestsQueue());
+        redeliveryPolicy.setDestination(this.controllableLoadRequestsQueue());
         redeliveryPolicy.setBackOffMultiplier(Double.parseDouble(this.environment
                 .getRequiredProperty(PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_REQUESTS_BACK_OFF_MULTIPLIER)));
         redeliveryPolicy.setUseExponentialBackOff(Boolean.parseBoolean(this.environment
@@ -181,15 +181,15 @@ public class MessagingConfig {
         return new ControllableLoadRequestMessageSender();
     }
 
-    // === JMS SETTINGS: PUBLIC LIGHTING RESPONSES ===
+    // === JMS SETTINGS: CONTROLLABLE LOAD RESPONSES ===
 
     /**
      * @return
      */
-    @Bean(name = "wsPublicLightingIncomingResponsesJmsTemplate")
-    public JmsTemplate publicLightingResponsesJmsTemplate() {
+    @Bean(name = "wsControllableLoadIncomingResponsesJmsTemplate")
+    public JmsTemplate controllableLoadResponsesJmsTemplate() {
         final JmsTemplate jmsTemplate = new JmsTemplate();
-        jmsTemplate.setDefaultDestination(this.publicLightingResponsesQueue());
+        jmsTemplate.setDefaultDestination(this.controllableLoadResponsesQueue());
         // Enable the use of deliveryMode, priority, and timeToLive
         jmsTemplate.setExplicitQosEnabled(Boolean.parseBoolean(this.environment
                 .getRequiredProperty(PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_RESPONSES_EXPLICIT_QOS_ENABLED)));
@@ -204,13 +204,13 @@ public class MessagingConfig {
     }
 
     @Bean
-    public ActiveMQDestination publicLightingResponsesQueue() {
+    public ActiveMQDestination controllableLoadResponsesQueue() {
         return new ActiveMQQueue(
                 this.environment.getRequiredProperty(PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_RESPONSES_QUEUE));
     }
 
     @Bean
-    public RedeliveryPolicy publicLightingResponsesRedeliveryPolicy() {
+    public RedeliveryPolicy controllableLoadResponsesRedeliveryPolicy() {
         final RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
         redeliveryPolicy.setInitialRedeliveryDelay(Long.parseLong(this.environment
                 .getRequiredProperty(PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_RESPONSES_INITIAL_REDELIVERY_DELAY)));
@@ -220,7 +220,7 @@ public class MessagingConfig {
                 .getRequiredProperty(PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_RESPONSES_MAXIMUM_REDELIVERY_DELAY)));
         redeliveryPolicy.setRedeliveryDelay(Long.parseLong(
                 this.environment.getRequiredProperty(PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_RESPONSES_REDELIVERY_DELAY)));
-        redeliveryPolicy.setDestination(this.publicLightingRequestsQueue());
+        redeliveryPolicy.setDestination(this.controllableLoadRequestsQueue());
         redeliveryPolicy.setBackOffMultiplier(Double.parseDouble(this.environment
                 .getRequiredProperty(PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_RESPONSES_BACK_OFF_MULTIPLIER)));
         redeliveryPolicy.setUseExponentialBackOff(Boolean.parseBoolean(this.environment
@@ -236,10 +236,10 @@ public class MessagingConfig {
         return new ControllableLoadResponseMessageFinder();
     }
 
-    // === JMS SETTINGS: PUBLIC LIGHTING LOGGING ===
+    // === JMS SETTINGS: CONTROLLABLE LOAD LOGGING ===
 
     @Bean
-    public ActiveMQDestination publicLightingLoggingQueue() {
+    public ActiveMQDestination controllableLoadLoggingQueue() {
         return new ActiveMQQueue(
                 this.environment.getRequiredProperty(PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_LOGGING_QUEUE));
     }
@@ -250,7 +250,7 @@ public class MessagingConfig {
     @Bean
     public JmsTemplate loggingJmsTemplate() {
         final JmsTemplate jmsTemplate = new JmsTemplate();
-        jmsTemplate.setDefaultDestination(this.publicLightingLoggingQueue());
+        jmsTemplate.setDefaultDestination(this.controllableLoadLoggingQueue());
         // Enable the use of deliveryMode, priority, and timeToLive
         jmsTemplate.setExplicitQosEnabled(Boolean.parseBoolean(this.environment
                 .getRequiredProperty(PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_LOGGING_EXPLICIT_QOS_ENABLED)));
@@ -266,7 +266,7 @@ public class MessagingConfig {
      * @return
      */
     @Bean
-    public RedeliveryPolicy publicLightingLoggingRedeliveryPolicy() {
+    public RedeliveryPolicy controllableLoadLoggingRedeliveryPolicy() {
         final RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
         redeliveryPolicy.setInitialRedeliveryDelay(Long.parseLong(this.environment
                 .getRequiredProperty(PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_LOGGING_INITIAL_REDELIVERY_DELAY)));
@@ -276,7 +276,7 @@ public class MessagingConfig {
                 .getRequiredProperty(PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_LOGGING_MAXIMUM_REDELIVERY_DELAY)));
         redeliveryPolicy.setRedeliveryDelay(Long.parseLong(
                 this.environment.getRequiredProperty(PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_LOGGING_REDELIVERY_DELAY)));
-        redeliveryPolicy.setDestination(this.publicLightingLoggingQueue());
+        redeliveryPolicy.setDestination(this.controllableLoadLoggingQueue());
         redeliveryPolicy.setBackOffMultiplier(Double.parseDouble(
                 this.environment.getRequiredProperty(PROPERTY_NAME_JMS_CONTROLLABLE_LOAD_LOGGING_BACK_OFF_MULTIPLIER)));
         redeliveryPolicy.setUseExponentialBackOff(Boolean.parseBoolean(this.environment
@@ -290,3 +290,4 @@ public class MessagingConfig {
     }
 
 }
+mmm

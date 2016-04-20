@@ -39,7 +39,7 @@ import com.alliander.osgp.shared.exceptionhandling.FunctionalException;
 import com.alliander.osgp.shared.exceptionhandling.OsgpException;
 import com.alliander.osgp.shared.infra.jms.ResponseMessage;
 
-@Service(value = "wsPublicLightingAdHocManagementService")
+@Service(value = "wsControllableLoadAdHocManagementService")
 @Transactional(value = "transactionManager")
 @Validated
 public class AdHocManagementService {

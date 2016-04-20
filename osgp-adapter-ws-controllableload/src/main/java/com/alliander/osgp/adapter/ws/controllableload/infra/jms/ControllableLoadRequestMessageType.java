@@ -8,7 +8,7 @@
 package com.alliander.osgp.adapter.ws.controllableload.infra.jms;
 
 /**
- * Enumeration of public lighting request message types
+ * Enumeration of controllable load request message types
  */
 public enum ControllableLoadRequestMessageType {
     SWITCH,

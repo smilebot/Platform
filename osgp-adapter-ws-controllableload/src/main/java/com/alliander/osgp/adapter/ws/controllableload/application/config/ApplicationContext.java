@@ -26,11 +26,11 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
  * configuration requires Spring Framework 3.0
  */
 @Configuration
-@ComponentScan(basePackages = { "com.alliander.osgp.domain.core", "com.alliander.osgp.adapter.ws.publiclighting" })
+@ComponentScan(basePackages = { "com.alliander.osgp.domain.core", "com.alliander.osgp.adapter.ws.controllableload" })
 @EnableTransactionManagement()
 @ImportResource("classpath:applicationContext.xml")
 @Import({ MessagingConfig.class, PersistenceConfig.class, WebServiceConfig.class })
-@PropertySource("file:${osp/osgpAdapterWsPublicLighting/config}")
+@PropertySource("file:${osp/osgpAdapterWsControllableLoad/config}")
 public class ApplicationContext {
 
     private static final String LOCAL_TIME_ZONE_IDENTIFIER = "Europe/Paris";

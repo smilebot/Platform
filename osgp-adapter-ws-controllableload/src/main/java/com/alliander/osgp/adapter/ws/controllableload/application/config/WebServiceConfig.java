@@ -35,7 +35,7 @@ import com.alliander.osgp.adapter.ws.endpointinterceptors.WebServiceMonitorInter
 import com.alliander.osgp.adapter.ws.endpointinterceptors.X509CertificateRdnAttributeValueEndpointInterceptor;
 
 @Configuration
-@PropertySource("file:${osp/osgpAdapterWsPublicLighting/config}")
+@PropertySource("file:${osp/osgpAdapterWsControllableLoad/config}")
 public class WebServiceConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebServiceConfig.class);
@@ -55,7 +55,7 @@ public class WebServiceConfig {
     @Resource
     private Environment environment;
 
-    // === PUBLIC LIGHTING MARSHALLERS ===
+    // === CONTROLLABLE LOAD MARSHALLERS ===
 
     /**
      * Method for creating the Marshaller for controllable load ad hoc
@@ -102,7 +102,7 @@ public class WebServiceConfig {
 
         final List<MethodArgumentResolver> methodArgumentResolvers = new ArrayList<MethodArgumentResolver>();
 
-        // Add Public Lighting Marshalling Payload Method Processors to Method
+        // Add Controllable Load Marshalling Payload Method Processors to Method
         // Argument Resolvers
         methodArgumentResolvers.add(this.controllableLoadAdHocManagementMarshallingPayloadMethodProcessor());
 
@@ -113,7 +113,7 @@ public class WebServiceConfig {
 
         final List<MethodReturnValueHandler> methodReturnValueHandlers = new ArrayList<MethodReturnValueHandler>();
 
-        // Add Public Lighting Marshalling Payload Method Processors to Method
+        // Add Controllable Load Marshalling Payload Method Processors to Method
         // Return Value Handlers
         methodReturnValueHandlers.add(this.controllableLoadAdHocManagementMarshallingPayloadMethodProcessor());
 
