@@ -107,7 +107,8 @@ public class MessagingConfig {
         final RedeliveryPolicyMap redeliveryPolicyMap = new RedeliveryPolicyMap();
         redeliveryPolicyMap.setDefaultEntry(this.defaultRedeliveryPolicy());
         redeliveryPolicyMap.put(this.controllableLoadRequestsQueue(), this.controllableLoadRequestsRedeliveryPolicy());
-        redeliveryPolicyMap.put(this.controllableLoadResponsesQueue(), this.controllableLoadResponsesRedeliveryPolicy());
+        redeliveryPolicyMap.put(this.controllableLoadResponsesQueue(),
+                this.controllableLoadResponsesRedeliveryPolicy());
         redeliveryPolicyMap.put(this.controllableLoadLoggingQueue(), this.controllableLoadLoggingRedeliveryPolicy());
         return redeliveryPolicyMap;
     }
@@ -290,4 +291,3 @@ public class MessagingConfig {
     }
 
 }
-mmm
