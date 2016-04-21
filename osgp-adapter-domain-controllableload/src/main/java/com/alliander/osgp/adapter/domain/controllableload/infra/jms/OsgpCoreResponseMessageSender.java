@@ -26,7 +26,7 @@ import com.alliander.osgp.shared.infra.jms.ResponseMessage;
 public class OsgpCoreResponseMessageSender {
 
     @Autowired
-    @Qualifier("domainPublicLightingOutgoingOsgpCoreResponsesJmsTemplate")
+    @Qualifier("domainControllableLoadOutgoingOsgpCoreResponsesJmsTemplate")
     private JmsTemplate osgpCoreResponsesJmsTemplate;
 
     public void send(final ResponseMessage responseMessage, final String messageType) {

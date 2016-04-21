@@ -37,12 +37,12 @@ public class GetStatusRequestMessageProcessor extends WebServiceRequestMessagePr
     private AdHocManagementService adHocManagementService;
 
     public GetStatusRequestMessageProcessor() {
-        super(DeviceFunction.GET_LIGHT_STATUS);
+        super(DeviceFunction.GET_STATUS);
     }
 
     @Override
     public void processMessage(final ObjectMessage message) {
-        LOGGER.info("Processing public lighting get status request message");
+        LOGGER.info("Processing controllable load get status request message");
 
         String correlationUid = null;
         String messageType = null;
@@ -67,7 +67,7 @@ public class GetStatusRequestMessageProcessor extends WebServiceRequestMessagePr
             LOGGER.info("Calling application service function: {}", messageType);
 
             this.adHocManagementService.getStatus(organisationIdentification, deviceIdentification, correlationUid,
-                    DomainType.PUBLIC_LIGHTING, messageType);
+                    DomainType.CONTROLLABLE_LOAD, messageType);
 
         } catch (final Exception e) {
             this.handleError(e, correlationUid, organisationIdentification, deviceIdentification, messageType);

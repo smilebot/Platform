@@ -41,12 +41,12 @@ public class GetStatusResponseMessageProcessor extends OsgpCoreResponseMessagePr
     private AdHocManagementService adHocManagementService;
 
     protected GetStatusResponseMessageProcessor() {
-        super(DeviceFunction.GET_LIGHT_STATUS);
+        super(DeviceFunction.GET_STATUS);
     }
 
     @Override
     public void processMessage(final ObjectMessage message) throws JMSException {
-        LOGGER.debug("Processing public lighting get status response message");
+        LOGGER.debug("Processing controllable load get status response message");
 
         String correlationUid = null;
         String messageType = null;
@@ -85,7 +85,7 @@ public class GetStatusResponseMessageProcessor extends OsgpCoreResponseMessagePr
 
             final DeviceStatus deviceLightStatus = (DeviceStatus) dataObject;
 
-            this.adHocManagementService.handleGetStatusResponse(deviceLightStatus, DomainType.PUBLIC_LIGHTING,
+            this.adHocManagementService.handleGetStatusResponse(deviceLightStatus, DomainType.CONTROLLABLE_LOAD,
                     deviceIdentification, organisationIdentification, correlationUid, messageType,
                     responseMessageResultType, osgpException);
 

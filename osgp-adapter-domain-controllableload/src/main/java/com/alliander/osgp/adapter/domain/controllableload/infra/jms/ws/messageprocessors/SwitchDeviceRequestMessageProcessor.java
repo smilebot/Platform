@@ -37,12 +37,12 @@ public class SwitchDeviceRequestMessageProcessor extends WebServiceRequestMessag
     private AdHocManagementService adHocManagementService;
 
     public SwitchDeviceRequestMessageProcessor() {
-        super(DeviceFunction.SET_LIGHT);
+        super(DeviceFunction.SWITCH_DEVICE);
     }
 
     @Override
     public void processMessage(final ObjectMessage message) {
-        LOGGER.debug("Processing public lighting set light request message");
+        LOGGER.debug("Processing controllable load switch device request message");
 
         String correlationUid = null;
         String messageType = null;

@@ -46,7 +46,7 @@ public class DefaultResponseMessageProcessor extends OsgpCoreResponseMessageProc
 
     @Override
     public void processMessage(final ObjectMessage message) throws JMSException {
-        LOGGER.debug("Processing public lighting default response message");
+        LOGGER.debug("Processing controllable load default response message");
 
         String correlationUid = null;
         String messageType = null;

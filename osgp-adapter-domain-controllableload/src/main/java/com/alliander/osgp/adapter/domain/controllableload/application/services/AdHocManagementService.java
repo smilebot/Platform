@@ -85,8 +85,7 @@ public class AdHocManagementService extends AbstractService {
     // === GET STATUS ===
 
     /**
-     * Retrieve status of device and provide a mapped response (PublicLighting
-     * or TariffSwitching)
+     * Retrieve status of device 
      *
      * @param organisationIdentification
      *            identification of organisation
