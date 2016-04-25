@@ -7,19 +7,15 @@
  */
 package com.alliander.osgp.domain.core.entities;
 
-import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
@@ -27,15 +23,13 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
 import javax.persistence.Transient;
-import javax.persistence.Version;
 
 import org.hibernate.annotations.Type;
 
 import com.alliander.osgp.domain.core.validation.Identification;
 import com.alliander.osgp.domain.core.valueobjects.DeviceFunctionGroup;
+import com.alliander.osgp.shared.domain.entities.AbstractEntity;
 
 /**
  * Entity class which is the base for all smart devices. Other smart device
@@ -44,40 +38,13 @@ import com.alliander.osgp.domain.core.valueobjects.DeviceFunctionGroup;
  */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-public class Device implements Serializable {
+@DiscriminatorColumn(name = "deviceType")
+public class Device extends AbstractEntity {
 
     /**
      * Serial Version UID.
      */
     private static final long serialVersionUID = -4119222373415540822L;
-
-    /**
-     * Primary key.
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    protected Long id;
-
-    /**
-     * Creation time of this entity. This field is set by { @see
-     * this.prePersist() }.
-     */
-    @Column(nullable = false)
-    protected Date creationTime = new Date();
-
-    /**
-     * Modification time of this entity. This field is set by { @see
-     * this.preUpdate() }.
-     */
-    @Column(nullable = false)
-    protected Date modificationTime = new Date();
-
-    /**
-     * Version of this entity.
-     */
-    @Version
-    private Long version = -1L;
 
     /**
      * Device identification of a device. This is the main value used to find a
@@ -203,7 +170,8 @@ public class Device implements Serializable {
      * Firmware history information
      */
     @ManyToMany()
-    @JoinTable(name = "firmware_history", joinColumns = { @JoinColumn(name = "device") }, inverseJoinColumns = { @JoinColumn(name = "firmware") })
+    @JoinTable(name = "firmware_history", joinColumns = { @JoinColumn(name = "device") }, inverseJoinColumns = {
+            @JoinColumn(name = "firmware") })
     protected List<Firmware> firmwareHistory;
 
     public Device() {
@@ -228,7 +196,8 @@ public class Device implements Serializable {
         this.gpsLongitude = gpsLongitude;
     }
 
-    public DeviceAuthorization addAuthorization(final Organisation organisation, final DeviceFunctionGroup functionGroup) {
+    public DeviceAuthorization addAuthorization(final Organisation organisation,
+            final DeviceFunctionGroup functionGroup) {
         final DeviceAuthorization authorization = new DeviceAuthorization(this, organisation, functionGroup);
         this.authorizations.add(authorization);
         return authorization;
@@ -282,10 +251,6 @@ public class Device implements Serializable {
         return this.containerStreet;
     }
 
-    public final Date getCreationTime() {
-        return (Date) this.creationTime.clone();
-    }
-
     public String getDeviceIdentification() {
         return this.deviceIdentification;
     }
@@ -302,16 +267,8 @@ public class Device implements Serializable {
         return this.gpsLongitude;
     }
 
-    public final Long getId() {
-        return this.id;
-    }
-
     public String getIpAddress() {
         return this.networkAddress == null ? null : this.networkAddress.getHostAddress();
-    }
-
-    public final Date getModificationTime() {
-        return (Date) this.modificationTime.clone();
     }
 
     public InetAddress getNetworkAddress() {
@@ -354,10 +311,6 @@ public class Device implements Serializable {
         return this.gatewayDevice;
     }
 
-    public final Long getVersion() {
-        return this.version;
-    }
-
     @Override
     public int hashCode() {
         return Objects.hashCode(this.deviceIdentification);
@@ -369,28 +322,6 @@ public class Device implements Serializable {
 
     public boolean isInMaintenance() {
         return this.inMaintenance;
-    }
-
-    /**
-     * Method for actions to be taken before inserting.
-     */
-    @PrePersist
-    private void prePersist() {
-        final Date now = new Date();
-        this.creationTime = now;
-        this.modificationTime = now;
-    }
-
-    /**
-     * Method for actions to be taken before updating.
-     */
-    @PreUpdate
-    private void preUpdate() {
-        this.modificationTime = new Date();
-    }
-
-    public void setVersion(final Long newVersion) {
-        this.version = newVersion;
     }
 
     /**
