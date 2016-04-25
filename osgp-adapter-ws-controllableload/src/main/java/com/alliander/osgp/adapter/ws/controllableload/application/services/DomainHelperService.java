@@ -10,13 +10,13 @@ package com.alliander.osgp.adapter.ws.controllableload.application.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alliander.osgp.domain.controllableload.entities.ClsDevice;
+import com.alliander.osgp.domain.controllableload.repositories.ClsDeviceRepository;
 import com.alliander.osgp.domain.core.entities.Device;
 import com.alliander.osgp.domain.core.entities.Organisation;
 import com.alliander.osgp.domain.core.exceptions.NotAuthorizedException;
 import com.alliander.osgp.domain.core.exceptions.UnknownEntityException;
-import com.alliander.osgp.domain.core.exceptions.UnregisteredDeviceException;
-import com.alliander.osgp.domain.core.services.DeviceDomainService;
-import com.alliander.osgp.domain.core.services.OrganisationDomainService;
+import com.alliander.osgp.domain.core.repositories.OrganisationRepository;
 import com.alliander.osgp.domain.core.services.SecurityService;
 import com.alliander.osgp.domain.core.valueobjects.DeviceFunction;
 import com.alliander.osgp.domain.core.valueobjects.PlatformFunction;
@@ -30,42 +30,29 @@ public class DomainHelperService {
     private static ComponentType COMPONENT_TYPE = ComponentType.WS_CONTROLLABLE_LOAD;
 
     @Autowired
-    private DeviceDomainService deviceDomainService;
+    private ClsDeviceRepository cldDeviceRepository;
 
     @Autowired
-    private OrganisationDomainService organisationDomainService;
+    private OrganisationRepository organisationRepository;
 
     @Autowired
     private SecurityService securityService;
 
-    public Device findDevice(final String deviceIdentification) throws FunctionalException {
-        Device device;
-        try {
-            device = this.deviceDomainService.searchDevice(deviceIdentification);
-        } catch (final UnknownEntityException e) {
-            throw new FunctionalException(FunctionalExceptionType.UNKNOWN_DEVICE, COMPONENT_TYPE, e);
-        }
-        return device;
-    }
-
-    public Device findActiveDevice(final String deviceIdentification) throws FunctionalException {
-        Device device;
-        try {
-            device = this.deviceDomainService.searchActiveDevice(deviceIdentification);
-        } catch (final UnregisteredDeviceException e) {
-            throw new FunctionalException(FunctionalExceptionType.UNREGISTERED_DEVICE, COMPONENT_TYPE, e);
-        } catch (final UnknownEntityException e) {
-            throw new FunctionalException(FunctionalExceptionType.UNKNOWN_DEVICE, COMPONENT_TYPE, e);
+    public ClsDevice findDevice(final String deviceIdentification) throws FunctionalException {
+        final ClsDevice device = this.cldDeviceRepository.findByDeviceIdentification(deviceIdentification);
+        if (device == null) {
+            throw new FunctionalException(FunctionalExceptionType.UNKNOWN_DEVICE, COMPONENT_TYPE,
+                    new UnknownEntityException(ClsDevice.class, deviceIdentification));
         }
         return device;
     }
 
     public Organisation findOrganisation(final String organisationIdentification) throws FunctionalException {
-        Organisation organisation;
-        try {
-            organisation = this.organisationDomainService.searchOrganisation(organisationIdentification);
-        } catch (final UnknownEntityException e) {
-            throw new FunctionalException(FunctionalExceptionType.UNKNOWN_ORGANISATION, COMPONENT_TYPE, e);
+        final Organisation organisation = this.organisationRepository
+                .findByOrganisationIdentification(organisationIdentification);
+        if (organisation == null) {
+            throw new FunctionalException(FunctionalExceptionType.UNKNOWN_ORGANISATION, COMPONENT_TYPE,
+                    new UnknownEntityException(Organisation.class, organisationIdentification));
         }
         return organisation;
     }
@@ -85,12 +72,6 @@ public class DomainHelperService {
             this.securityService.checkAuthorization(organisation, device, deviceFunction);
         } catch (final NotAuthorizedException e) {
             throw new FunctionalException(FunctionalExceptionType.UNAUTHORIZED, COMPONENT_TYPE, e);
-        }
-    }
-
-    public void isInMaintenance(final Device device) throws FunctionalException {
-        if (device.isInMaintenance()) {
-            throw new FunctionalException(FunctionalExceptionType.DEVICE_IN_MAINTENANCE, COMPONENT_TYPE);
         }
     }
 }

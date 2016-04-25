@@ -37,10 +37,10 @@ import com.alliander.osgp.adapter.ws.schema.controllableload.adhocmanagement.Swi
 import com.alliander.osgp.adapter.ws.schema.controllableload.adhocmanagement.SwitchDeviceResponse;
 import com.alliander.osgp.adapter.ws.schema.controllableload.common.AsyncResponse;
 import com.alliander.osgp.adapter.ws.schema.controllableload.common.OsgpResultType;
-import com.alliander.osgp.domain.core.entities.Device;
+import com.alliander.osgp.domain.controllableload.entities.ClsDevice;
+import com.alliander.osgp.domain.controllableload.valueobjects.RelayValue;
 import com.alliander.osgp.domain.core.exceptions.ValidationException;
 import com.alliander.osgp.domain.core.valueobjects.DeviceStatus;
-import com.alliander.osgp.domain.core.valueobjects.LightValue;
 import com.alliander.osgp.shared.exceptionhandling.ComponentType;
 import com.alliander.osgp.shared.exceptionhandling.FunctionalException;
 import com.alliander.osgp.shared.exceptionhandling.FunctionalExceptionType;
@@ -82,7 +82,7 @@ public class ControllableLoadAdHocManagementEndpoint {
         final FindAllDevicesResponse response = new FindAllDevicesResponse();
 
         try {
-            final Page<Device> page = this.adHocManagementService.findAllDevices(organisationIdentification,
+            final Page<ClsDevice> page = this.adHocManagementService.findAllDevices(organisationIdentification,
                     request.getPage());
 
             final DevicePage devicePage = new DevicePage();
@@ -114,11 +114,11 @@ public class ControllableLoadAdHocManagementEndpoint {
         final SwitchDeviceAsyncResponse response = new SwitchDeviceAsyncResponse();
 
         try {
-            final List<LightValue> lightValues = new ArrayList<>();
-            lightValues.addAll(this.adHocManagementMapper.mapAsList(request.getRelayValue(), LightValue.class));
+            final List<RelayValue> relayValues = new ArrayList<>();
+            relayValues.addAll(this.adHocManagementMapper.mapAsList(request.getRelayValue(), RelayValue.class));
 
-            final String correlationUid = this.adHocManagementService.enqueueSwitchRequest(organisationIdentification,
-                    request.getDeviceIdentification(), lightValues);
+            final String correlationUid = this.adHocManagementService.enqueueSwitchDeviceRequest(
+                    organisationIdentification, request.getDeviceIdentification(), relayValues);
 
             final AsyncResponse asyncResponse = new AsyncResponse();
 
@@ -150,7 +150,7 @@ public class ControllableLoadAdHocManagementEndpoint {
 
         try {
             final ResponseMessage message = this.adHocManagementService
-                    .dequeueSwitchResponse(request.getAsyncRequest().getCorrelationUid());
+                    .dequeueSwitchDeviceResponse(request.getAsyncRequest().getCorrelationUid());
             if (message != null) {
                 response.setResult(OsgpResultType.fromValue(message.getResult().getValue()));
             }

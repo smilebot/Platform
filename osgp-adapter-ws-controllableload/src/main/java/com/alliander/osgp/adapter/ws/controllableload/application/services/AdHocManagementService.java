@@ -7,6 +7,9 @@
  */
 package com.alliander.osgp.adapter.ws.controllableload.application.services;
 
+import static org.springframework.data.jpa.domain.Specifications.where;
+
+import java.io.Serializable;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -19,6 +22,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -27,14 +31,15 @@ import com.alliander.osgp.adapter.ws.controllableload.infra.jms.ControllableLoad
 import com.alliander.osgp.adapter.ws.controllableload.infra.jms.ControllableLoadRequestMessageSender;
 import com.alliander.osgp.adapter.ws.controllableload.infra.jms.ControllableLoadRequestMessageType;
 import com.alliander.osgp.adapter.ws.controllableload.infra.jms.ControllableLoadResponseMessageFinder;
-import com.alliander.osgp.domain.core.entities.Device;
+import com.alliander.osgp.domain.controllableload.clsdevice.ClsDeviceSpecifications;
+import com.alliander.osgp.domain.controllableload.entities.ClsDevice;
+import com.alliander.osgp.domain.controllableload.repositories.ClsDeviceRepository;
+import com.alliander.osgp.domain.controllableload.valueobjects.RelayValue;
 import com.alliander.osgp.domain.core.entities.Organisation;
-import com.alliander.osgp.domain.core.repositories.DeviceRepository;
+import com.alliander.osgp.domain.core.exceptions.ArgumentNullOrEmptyException;
 import com.alliander.osgp.domain.core.services.CorrelationIdProviderService;
 import com.alliander.osgp.domain.core.validation.Identification;
 import com.alliander.osgp.domain.core.valueobjects.DeviceFunction;
-import com.alliander.osgp.domain.core.valueobjects.LightValue;
-import com.alliander.osgp.domain.core.valueobjects.LightValueMessageDataContainer;
 import com.alliander.osgp.shared.exceptionhandling.FunctionalException;
 import com.alliander.osgp.shared.exceptionhandling.OsgpException;
 import com.alliander.osgp.shared.infra.jms.ResponseMessage;
@@ -44,17 +49,19 @@ import com.alliander.osgp.shared.infra.jms.ResponseMessage;
 @Validated
 public class AdHocManagementService {
 
-    // TODO refactor
-
-    private static final int PAGE_SIZE = 30;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AdHocManagementService.class);
+
+    @Autowired
+    private int pageSize;
 
     @Autowired
     private DomainHelperService domainHelperService;
 
     @Autowired
-    private DeviceRepository deviceRepository;
+    private ClsDeviceRepository clsDeviceRepository;
+
+    @Autowired
+    private ClsDeviceSpecifications clsDeviceSpecifications;
 
     @Autowired
     private CorrelationIdProviderService correlationIdProviderService;
@@ -71,46 +78,57 @@ public class AdHocManagementService {
         // Parameterless constructor required for transactions
     }
 
-    public Page<Device> findAllDevices(@Identification final String organisationIdentification, final int pageNumber)
+    public Page<ClsDevice> findAllDevices(@Identification final String organisationIdentification, final int pageNumber)
             throws FunctionalException {
         LOGGER.debug("findAllDevices called with organisation {} and pageNumber {}", organisationIdentification,
                 pageNumber);
 
-        final Organisation organisation = this.domainHelperService.findOrganisation(organisationIdentification);
+        Page<ClsDevice> clsDevicesPage = null;
 
-        final PageRequest request = new PageRequest(pageNumber, PAGE_SIZE, Sort.Direction.DESC, "deviceIdentification");
-        return this.deviceRepository.findAllAuthorized(organisation, request);
+        try {
+
+            final Organisation organisation = this.domainHelperService.findOrganisation(organisationIdentification);
+
+            final Specifications<ClsDevice> specifications = where(
+                    this.clsDeviceSpecifications.forOrganisation(organisation));
+
+            final PageRequest request = new PageRequest(pageNumber, this.pageSize, Sort.Direction.DESC,
+                    "deviceIdentification");
+
+            clsDevicesPage = this.clsDeviceRepository.findAll(specifications, request);
+        } catch (final ArgumentNullOrEmptyException e) {
+            LOGGER.error("Invalid organisation", e);
+        }
+
+        return clsDevicesPage;
     }
 
-    public String enqueueSwitchRequest(@Identification final String organisationIdentification,
+    public String enqueueSwitchDeviceRequest(@Identification final String organisationIdentification,
             @Identification final String deviceIdentification,
-            @Size(min = 1, max = 6) @Valid final List<LightValue> relayValues) throws FunctionalException {
+            @Size(min = 1, max = 4) @Valid final List<RelayValue> relayValues) throws FunctionalException {
 
         final Organisation organisation = this.domainHelperService.findOrganisation(organisationIdentification);
-        final Device device = this.domainHelperService.findActiveDevice(deviceIdentification);
 
-        this.domainHelperService.isAllowed(organisation, device, DeviceFunction.SET_LIGHT);
-        this.domainHelperService.isInMaintenance(device);
+        final ClsDevice clsDevice = this.domainHelperService.findDevice(deviceIdentification);
 
-        LOGGER.debug("enqueueSetLightRequest called with organisation {} and device {}", organisationIdentification,
+        this.domainHelperService.isAllowed(organisation, clsDevice, DeviceFunction.SWITCH_DEVICE);
+
+        LOGGER.debug("enqueueSwitchDeviceRequest called with organisation {} and device {}", organisationIdentification,
                 deviceIdentification);
 
         final String correlationUid = this.correlationIdProviderService.getCorrelationId(organisationIdentification,
                 deviceIdentification);
 
-        final LightValueMessageDataContainer relayValueMessageDataContainer = new LightValueMessageDataContainer(
-                relayValues);
-
         final ControllableLoadRequestMessage message = new ControllableLoadRequestMessage(
                 ControllableLoadRequestMessageType.SWITCH, correlationUid, organisationIdentification,
-                deviceIdentification, relayValueMessageDataContainer, null);
+                deviceIdentification, (Serializable) relayValues, null);
 
         this.controllableLoadRequestMessageSender.send(message);
 
         return correlationUid;
     }
 
-    public ResponseMessage dequeueSwitchResponse(final String correlationUid) throws OsgpException {
+    public ResponseMessage dequeueSwitchDeviceResponse(final String correlationUid) throws OsgpException {
 
         return this.controllableLoadResponseMessageFinder.findMessage(correlationUid);
     }
@@ -119,9 +137,10 @@ public class AdHocManagementService {
             @Identification final String deviceIdentification) throws FunctionalException {
 
         final Organisation organisation = this.domainHelperService.findOrganisation(organisationIdentification);
-        final Device device = this.domainHelperService.findActiveDevice(deviceIdentification);
 
-        this.domainHelperService.isAllowed(organisation, device, DeviceFunction.GET_STATUS);
+        final ClsDevice clsDevice = this.domainHelperService.findDevice(deviceIdentification);
+
+        this.domainHelperService.isAllowed(organisation, clsDevice, DeviceFunction.GET_STATUS);
 
         LOGGER.debug("enqueueGetStatusRequest called with organisation {} and device {}", organisationIdentification,
                 deviceIdentification);
