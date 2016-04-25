@@ -84,6 +84,7 @@
 
         <!-- Domain -->
         <module>osgp-domain-core</module>
+        <module>osgp-domain-controllableload</module>
         <module>osgp-domain-logging</module>
 
         <module>osgp-adapter-domain-shared</module>

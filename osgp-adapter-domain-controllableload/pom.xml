@@ -50,7 +50,7 @@
         <!-- Alliander -->
         <dependency>
             <groupId>com.alliander.osgp</groupId>
-            <artifactId>osgp-domain-core</artifactId>
+            <artifactId>osgp-domain-controllableload</artifactId>
         </dependency>
         <dependency>
             <groupId>com.alliander.osgp</groupId>
