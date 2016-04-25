@@ -24,13 +24,15 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
+import com.alliander.osgp.domain.controllableload.repositories.ClsDeviceRepository;
+//import com.alliander.osgp.domain.controllableload.repositories.ClsDeviceRepository;
 import com.alliander.osgp.domain.core.exceptions.PlatformException;
 import com.alliander.osgp.domain.core.repositories.DeviceRepository;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
-@EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", basePackageClasses = {
-        DeviceRepository.class })
+@EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", basePackageClasses = { DeviceRepository.class,
+        ClsDeviceRepository.class })
 @Configuration
 @PropertySource("file:${osp/osgpAdapterDomainControllableLoad/config}")
 public class PersistenceConfig {
@@ -48,7 +50,8 @@ public class PersistenceConfig {
     private static final String PROPERTY_NAME_HIBERNATE_NAMING_STRATEGY = "hibernate.ejb.naming_strategy";
     private static final String PROPERTY_NAME_HIBERNATE_SHOW_SQL = "hibernate.show_sql";
 
-    private static final String PROPERTY_NAME_ENTITYMANAGER_PACKAGES_TO_SCAN = "entitymanager.packages.to.scan";
+    private static final String PROPERTY_NAME_ENTITYMANAGER_PACKAGES_TO_SCAN_CONTROLLABLE_LOAD = "entitymanager.packages.to.scan.controllableload";
+    private static final String PROPERTY_NAME_ENTITYMANAGER_PACKAGES_TO_SCAN_CORE = "entitymanager.packages.to.scan.core";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PersistenceConfig.class);
 
@@ -118,8 +121,11 @@ public class PersistenceConfig {
 
         entityManagerFactoryBean.setPersistenceUnitName("OSGP_DOMAIN_ADAPTER_CONTROLLABLELOAD");
         entityManagerFactoryBean.setDataSource(this.getDataSource());
-        entityManagerFactoryBean
-                .setPackagesToScan(this.environment.getRequiredProperty(PROPERTY_NAME_ENTITYMANAGER_PACKAGES_TO_SCAN));
+        entityManagerFactoryBean.setPackagesToScan(new String[] {
+                // this.environment.getRequiredProperty(PROPERTY_NAME_ENTITYMANAGER_PACKAGES_TO_SCAN_CORE)
+                // });
+                this.environment.getRequiredProperty(PROPERTY_NAME_ENTITYMANAGER_PACKAGES_TO_SCAN_CORE),
+                this.environment.getRequiredProperty(PROPERTY_NAME_ENTITYMANAGER_PACKAGES_TO_SCAN_CONTROLLABLE_LOAD) });
         entityManagerFactoryBean.setPersistenceProviderClass(HibernatePersistence.class);
 
         final Properties jpaProperties = new Properties();
