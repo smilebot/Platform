@@ -39,9 +39,7 @@ public class DefaultResponseMessageProcessor extends OsgpCoreResponseMessageProc
     private DefaultDeviceResponseService defaultDeviceResponseService;
 
     protected DefaultResponseMessageProcessor() {
-        super(DeviceFunction.SET_LIGHT);
-        this.addMessageType(DeviceFunction.RESUME_SCHEDULE);
-        this.addMessageType(DeviceFunction.SET_TRANSITION);
+        super(DeviceFunction.SWITCH_DEVICE);
     }
 
     @Override

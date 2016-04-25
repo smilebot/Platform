@@ -19,8 +19,7 @@ import org.springframework.stereotype.Component;
 import com.alliander.osgp.adapter.domain.controllableload.application.services.AdHocManagementService;
 import com.alliander.osgp.adapter.domain.controllableload.infra.jms.core.OsgpCoreResponseMessageProcessor;
 import com.alliander.osgp.domain.core.valueobjects.DeviceFunction;
-import com.alliander.osgp.domain.core.valueobjects.DomainType;
-import com.alliander.osgp.dto.valueobjects.DeviceStatus;
+import com.alliander.osgp.dto.valueobjects.controllableload.DeviceStatusDto;
 import com.alliander.osgp.shared.exceptionhandling.OsgpException;
 import com.alliander.osgp.shared.infra.jms.Constants;
 import com.alliander.osgp.shared.infra.jms.ResponseMessage;
@@ -83,11 +82,10 @@ public class GetStatusResponseMessageProcessor extends OsgpCoreResponseMessagePr
         try {
             LOGGER.info("Calling application service function to handle response: {}", messageType);
 
-            final DeviceStatus deviceLightStatus = (DeviceStatus) dataObject;
+            final DeviceStatusDto deviceStatusDto = (DeviceStatusDto) dataObject;
 
-            this.adHocManagementService.handleGetStatusResponse(deviceLightStatus, DomainType.CONTROLLABLE_LOAD,
-                    deviceIdentification, organisationIdentification, correlationUid, messageType,
-                    responseMessageResultType, osgpException);
+            this.adHocManagementService.handleGetStatusResponse(deviceStatusDto, deviceIdentification,
+                    organisationIdentification, correlationUid, messageType, responseMessageResultType, osgpException);
 
         } catch (final Exception e) {
             this.handleError(e, correlationUid, organisationIdentification, deviceIdentification, messageType);

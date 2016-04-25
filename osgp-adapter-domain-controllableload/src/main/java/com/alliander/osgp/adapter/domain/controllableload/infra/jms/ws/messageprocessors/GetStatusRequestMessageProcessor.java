@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 import com.alliander.osgp.adapter.domain.controllableload.application.services.AdHocManagementService;
 import com.alliander.osgp.adapter.domain.controllableload.infra.jms.ws.WebServiceRequestMessageProcessor;
 import com.alliander.osgp.domain.core.valueobjects.DeviceFunction;
-import com.alliander.osgp.domain.core.valueobjects.DomainType;
 import com.alliander.osgp.shared.infra.jms.Constants;
 
 /**
@@ -67,7 +66,7 @@ public class GetStatusRequestMessageProcessor extends WebServiceRequestMessagePr
             LOGGER.info("Calling application service function: {}", messageType);
 
             this.adHocManagementService.getStatus(organisationIdentification, deviceIdentification, correlationUid,
-                    DomainType.CONTROLLABLE_LOAD, messageType);
+                    messageType);
 
         } catch (final Exception e) {
             this.handleError(e, correlationUid, organisationIdentification, deviceIdentification, messageType);

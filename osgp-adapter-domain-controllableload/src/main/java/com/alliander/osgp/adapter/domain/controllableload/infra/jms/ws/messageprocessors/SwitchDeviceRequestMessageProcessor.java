@@ -7,6 +7,9 @@
  */
 package com.alliander.osgp.adapter.domain.controllableload.infra.jms.ws.messageprocessors;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.jms.JMSException;
 import javax.jms.ObjectMessage;
 
@@ -18,8 +21,8 @@ import org.springframework.stereotype.Component;
 
 import com.alliander.osgp.adapter.domain.controllableload.application.services.AdHocManagementService;
 import com.alliander.osgp.adapter.domain.controllableload.infra.jms.ws.WebServiceRequestMessageProcessor;
+import com.alliander.osgp.domain.controllableload.valueobjects.RelayValue;
 import com.alliander.osgp.domain.core.valueobjects.DeviceFunction;
-import com.alliander.osgp.domain.core.valueobjects.LightValueMessageDataContainer;
 import com.alliander.osgp.shared.infra.jms.Constants;
 
 /**
@@ -68,13 +71,27 @@ public class SwitchDeviceRequestMessageProcessor extends WebServiceRequestMessag
         try {
             LOGGER.info("Calling application service function: {}", messageType);
 
-            final LightValueMessageDataContainer lightValueMessageDataContainer = (LightValueMessageDataContainer) dataObject;
+            final List<RelayValue> relayValues = this.parse(dataObject);
 
             this.adHocManagementService.switchDevice(organisationIdentification, deviceIdentification, correlationUid,
-                    lightValueMessageDataContainer.getLightValues(), messageType);
+                    relayValues, messageType);
 
         } catch (final Exception e) {
             this.handleError(e, correlationUid, organisationIdentification, deviceIdentification, messageType);
         }
+    }
+
+    private List<RelayValue> parse(final Object object) {
+        final List<RelayValue> relayValues = new ArrayList<RelayValue>();
+        if (object instanceof ArrayList<?>) {
+            final ArrayList<?> al = (ArrayList<?>) object;
+            for (final Object o : al) {
+                if (o instanceof RelayValue) {
+                    relayValues.add((RelayValue) o);
+                }
+            }
+        }
+        return relayValues;
+
     }
 }
