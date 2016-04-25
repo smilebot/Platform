@@ -7,6 +7,8 @@
  */
 package com.alliander.osgp.adapter.ws.controllableload.application.config;
 
+import javax.annotation.Resource;
+
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeZone;
@@ -16,9 +18,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
+
+import com.alliander.osgp.adapter.ws.controllableload.infra.persistence.JpaClsDeviceSpecifications;
+import com.alliander.osgp.domain.controllableload.clsdevice.ClsDeviceSpecifications;
 
 /**
  * An application context Java configuration class. The usage of Java
@@ -32,10 +38,20 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 @PropertySource("file:${osp/osgpAdapterWsControllableLoad/config}")
 public class ApplicationContext {
 
+    private static final String PROPERTY_NAME_PAGE_SIZE = "page.size";
+
     private static final String LOCAL_TIME_ZONE_IDENTIFIER = "Europe/Paris";
     private static final DateTimeZone LOCAL_TIME_ZONE = DateTimeZone.forID(LOCAL_TIME_ZONE_IDENTIFIER);
     private static final int TIME_ZONE_OFFSET_MINUTES = LOCAL_TIME_ZONE.getStandardOffset(new DateTime().getMillis())
             / DateTimeConstants.MILLIS_PER_MINUTE;
+
+    @Resource
+    private Environment environment;
+
+    @Bean
+    public int pageSize() {
+        return Integer.parseInt(this.environment.getRequiredProperty(PROPERTY_NAME_PAGE_SIZE));
+    }
 
     /**
      * @return
@@ -72,4 +88,8 @@ public class ApplicationContext {
         return TIME_ZONE_OFFSET_MINUTES;
     }
 
+    @Bean
+    public ClsDeviceSpecifications clsDeviceSpecifications() {
+        return new JpaClsDeviceSpecifications();
+    }
 }
