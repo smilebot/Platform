@@ -15,7 +15,6 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -25,12 +24,10 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
-import com.alliander.osgp.domain.core.entities.Ean;
 import com.alliander.osgp.domain.core.valueobjects.RelayType;
 
 @Entity
 @PrimaryKeyJoinColumn(name = "id")
-@DiscriminatorValue(value = "SSLD")
 public class Ssld extends Device {
     /**
      * Serial Version UID.
@@ -65,9 +62,10 @@ public class Ssld extends Device {
     @LazyCollection(LazyCollectionOption.FALSE)
     private List<RelayStatus> relayStatusses;
 
-    // public Ssld() {
-    // // Default constructor.
-    // }
+    @SuppressWarnings("unused")
+    private Ssld() {
+        // Default constructor for Hibernate
+    }
 
     public Ssld(final String deviceIdentification) {
         this.deviceIdentification = deviceIdentification;
