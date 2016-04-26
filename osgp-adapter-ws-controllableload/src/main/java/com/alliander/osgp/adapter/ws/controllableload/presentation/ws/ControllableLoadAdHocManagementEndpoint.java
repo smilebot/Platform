@@ -56,7 +56,7 @@ import com.alliander.osgp.shared.infra.jms.ResponseMessage;
 public class ControllableLoadAdHocManagementEndpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ControllableLoadAdHocManagementEndpoint.class);
-    private static final String NAMESPACE = "http://www.alliander.com/schemas/osgp/controllableload/adhocmanagement/2014/10";
+    private static final String NAMESPACE = "http://www.alliander.com/schemas/osgp/controllableload/adhocmanagement/2016/04";
     private static final ComponentType COMPONENT_WS_CONTROLLABLE_LOAD = ComponentType.WS_CONTROLLABLE_LOAD;
 
     private static final String EXCEPTION_OCCURRED = "Exception Occurred";
