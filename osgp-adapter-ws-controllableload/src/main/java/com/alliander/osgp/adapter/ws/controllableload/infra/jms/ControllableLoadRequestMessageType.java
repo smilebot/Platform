@@ -11,6 +11,6 @@ package com.alliander.osgp.adapter.ws.controllableload.infra.jms;
  * Enumeration of controllable load request message types
  */
 public enum ControllableLoadRequestMessageType {
-    SWITCH,
+    SWITCH_DEVICE,
     GET_STATUS
 }

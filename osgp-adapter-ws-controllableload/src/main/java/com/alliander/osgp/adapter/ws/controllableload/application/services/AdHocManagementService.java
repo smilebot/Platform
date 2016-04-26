@@ -120,7 +120,7 @@ public class AdHocManagementService {
                 deviceIdentification);
 
         final ControllableLoadRequestMessage message = new ControllableLoadRequestMessage(
-                ControllableLoadRequestMessageType.SWITCH, correlationUid, organisationIdentification,
+                ControllableLoadRequestMessageType.SWITCH_DEVICE, correlationUid, organisationIdentification,
                 deviceIdentification, (Serializable) relayValues, null);
 
         this.controllableLoadRequestMessageSender.send(message);
