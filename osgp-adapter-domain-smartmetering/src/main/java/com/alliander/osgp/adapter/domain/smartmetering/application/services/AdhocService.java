@@ -22,11 +22,13 @@ import com.alliander.osgp.adapter.domain.smartmetering.infra.jms.core.OsgpCoreRe
 import com.alliander.osgp.adapter.domain.smartmetering.infra.jms.ws.WebServiceResponseMessageSender;
 import com.alliander.osgp.domain.core.entities.SmartMeter;
 import com.alliander.osgp.domain.core.valueobjects.smartmetering.AssociationLnListType;
-import com.alliander.osgp.domain.core.valueobjects.smartmetering.GetAssociationLnObjectsRequest;
+import com.alliander.osgp.domain.core.valueobjects.smartmetering.SpecificConfigurationObjectRequest;
 import com.alliander.osgp.dto.valueobjects.smartmetering.AssociationLnListTypeDto;
-import com.alliander.osgp.dto.valueobjects.smartmetering.GetAssociationLnObjectsRequestDataDto;
+import com.alliander.osgp.dto.valueobjects.smartmetering.GetAssociationLnObjectsRequestDto;
+import com.alliander.osgp.dto.valueobjects.smartmetering.ObisCodeValuesDto;
 import com.alliander.osgp.dto.valueobjects.smartmetering.RetrieveConfigurationObjectsRequestDto;
-import com.alliander.osgp.dto.valueobjects.smartmetering.SynchronizeTimeRequestDto;
+import com.alliander.osgp.dto.valueobjects.smartmetering.SpecificConfigurationObjectRequestDto;
+import com.alliander.osgp.dto.valueobjects.smartmetering.SynchronizeTimeRequest;
 import com.alliander.osgp.shared.exceptionhandling.FunctionalException;
 import com.alliander.osgp.shared.exceptionhandling.OsgpException;
 import com.alliander.osgp.shared.infra.jms.DeviceMessageMetadata;
@@ -70,7 +72,7 @@ public class AdhocService {
         final SmartMeter smartMeteringDevice = this.domainHelperService.findSmartMeter(deviceMessageMetadata
                 .getDeviceIdentification());
 
-        final SynchronizeTimeRequestDto synchronizeTimeRequestDto = new SynchronizeTimeRequestDto(
+        final SynchronizeTimeRequest synchronizeTimeRequestDto = new SynchronizeTimeRequest(
                 synchronizeTimeRequestValueObject.getDeviceIdentification());
 
         this.osgpCoreRequestMessageSender.send(new RequestMessage(deviceMessageMetadata.getCorrelationUid(),
@@ -136,14 +138,14 @@ public class AdhocService {
     }
 
     public void getAssociationLnObjects(final DeviceMessageMetadata deviceMessageMetadata,
-            final GetAssociationLnObjectsRequest request) throws FunctionalException {
+            final com.alliander.osgp.domain.core.valueobjects.smartmetering.GetAssociationLnObjectsRequest request) throws FunctionalException {
         LOGGER.debug("getAssociationLnObjects for organisationIdentification: {} for deviceIdentification: {}",
                 deviceMessageMetadata.getOrganisationIdentification(), deviceMessageMetadata.getDeviceIdentification());
 
         final SmartMeter smartMeteringDevice = this.domainHelperService.findSmartMeter(deviceMessageMetadata
                 .getDeviceIdentification());
 
-        final GetAssociationLnObjectsRequestDataDto requestDto = new GetAssociationLnObjectsRequestDataDto();
+        final GetAssociationLnObjectsRequestDto requestDto = new GetAssociationLnObjectsRequestDto();
 
         this.osgpCoreRequestMessageSender.send(new RequestMessage(deviceMessageMetadata.getCorrelationUid(),
                 deviceMessageMetadata.getOrganisationIdentification(), deviceMessageMetadata.getDeviceIdentification(),
@@ -168,6 +170,44 @@ public class AdhocService {
                 deviceMessageMetadata.getOrganisationIdentification(), deviceMessageMetadata.getDeviceIdentification(),
                 result, exception, associationLnListValueDomain, deviceMessageMetadata.getMessagePriority()),
                 deviceMessageMetadata.getMessageType());
+
+    }
+
+    public void getSpecificConfigurationObject(final DeviceMessageMetadata deviceMessageMetadata,
+            final SpecificConfigurationObjectRequest request) throws FunctionalException {
+
+        LOGGER.debug("getSpecificConfigurationObject for organisationIdentification: {} for deviceIdentification: {}",
+                deviceMessageMetadata.getOrganisationIdentification(), deviceMessageMetadata.getDeviceIdentification());
+
+        final SmartMeter smartMeteringDevice = this.domainHelperService.findSmartMeter(deviceMessageMetadata
+                .getDeviceIdentification());
+
+        final SpecificConfigurationObjectRequestDto requestDto = new SpecificConfigurationObjectRequestDto(
+                request.getClassId(), request.getAttribute(), this.mapperFactory.getMapperFacade().map(
+                        request.getObisCode(), ObisCodeValuesDto.class));
+
+        this.osgpCoreRequestMessageSender.send(new RequestMessage(deviceMessageMetadata.getCorrelationUid(),
+                deviceMessageMetadata.getOrganisationIdentification(), deviceMessageMetadata.getDeviceIdentification(),
+                smartMeteringDevice.getIpAddress(), requestDto), deviceMessageMetadata.getMessageType(),
+                deviceMessageMetadata.getMessagePriority(), deviceMessageMetadata.getScheduleTime());
+
+    }
+
+    public void handleGetSpecificConfigurationObjectResponse(final DeviceMessageMetadata deviceMessageMetadata,
+            final ResponseMessageResultType deviceResult, final OsgpException exception, final String resultData) {
+        LOGGER.debug("handleGetSpecificConfigurationObjectResponse for MessageType: {}",
+                deviceMessageMetadata.getMessageType());
+
+        ResponseMessageResultType result = deviceResult;
+        if (exception != null) {
+            LOGGER.error(DEVICE_RESPONSE_NOT_OK_UNEXPECTED_EXCEPTION, exception);
+            result = ResponseMessageResultType.NOT_OK;
+        }
+
+        this.webServiceResponseMessageSender.send(new ResponseMessage(deviceMessageMetadata.getCorrelationUid(),
+                deviceMessageMetadata.getOrganisationIdentification(), deviceMessageMetadata.getDeviceIdentification(),
+                result, exception, resultData, deviceMessageMetadata.getMessagePriority()), deviceMessageMetadata
+                .getMessageType());
 
     }
 }

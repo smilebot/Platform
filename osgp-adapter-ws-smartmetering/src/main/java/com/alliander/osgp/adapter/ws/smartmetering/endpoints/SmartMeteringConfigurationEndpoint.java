@@ -22,7 +22,6 @@ import com.alliander.osgp.adapter.ws.endpointinterceptors.OrganisationIdentifica
 import com.alliander.osgp.adapter.ws.endpointinterceptors.ScheduleTime;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.common.AsyncResponse;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.common.OsgpResultType;
-import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.ActivityCalendarDataType;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.AdministrativeStatusType;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.GetAdministrativeStatusAsyncRequest;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.GetAdministrativeStatusAsyncResponse;
@@ -35,6 +34,7 @@ import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.ReplaceK
 import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.SetActivityCalendarAsyncRequest;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.SetActivityCalendarAsyncResponse;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.SetActivityCalendarRequest;
+import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.SetActivityCalendarRequestData;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.SetActivityCalendarResponse;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.SetAdministrativeStatusAsyncRequest;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.SetAdministrativeStatusAsyncResponse;
@@ -96,7 +96,7 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
             @OrganisationIdentification final String organisationIdentification,
             @RequestPayload final SetAdministrativeStatusRequest request,
             @MessagePriority final String messagePriority, @ScheduleTime final String scheduleTime)
-                    throws OsgpException {
+            throws OsgpException {
 
         final com.alliander.osgp.domain.core.valueobjects.smartmetering.AdministrativeStatusType dataRequest = this.configurationMapper
                 .map(request.getEnabled(),
@@ -108,7 +108,7 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
                 this.configurationMapper.map(scheduleTime, Long.class));
 
         final SetAdministrativeStatusAsyncResponse asyncResponse = new com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.ObjectFactory()
-        .createSetAdministrativeStatusAsyncResponse();
+                .createSetAdministrativeStatusAsyncResponse();
         asyncResponse.setCorrelationUid(correlationUid);
         asyncResponse.setDeviceIdentification(request.getDeviceIdentification());
 
@@ -118,7 +118,6 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
     @PayloadRoot(localPart = "SetAdministrativeStatusAsyncRequest", namespace = SMARTMETER_CONFIGURATION_NAMESPACE)
     @ResponsePayload
     public SetAdministrativeStatusResponse retrieveSetAdministrativeStatusResponse(
-            @OrganisationIdentification final String organisationIdentification,
             @RequestPayload final SetAdministrativeStatusAsyncRequest request) throws OsgpException {
 
         SetAdministrativeStatusResponse response = null;
@@ -143,7 +142,7 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
             @OrganisationIdentification final String organisationIdentification,
             @RequestPayload final GetAdministrativeStatusRequest request,
             @MessagePriority final String messagePriority, @ScheduleTime final String scheduleTime)
-                    throws OsgpException {
+            throws OsgpException {
 
         final String correlationUid = this.configurationService.requestGetAdministrativeStatus(
                 organisationIdentification, request.getDeviceIdentification(),
@@ -151,7 +150,7 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
                 this.configurationMapper.map(scheduleTime, Long.class));
 
         final GetAdministrativeStatusAsyncResponse asyncResponse = new com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.ObjectFactory()
-                .createGetAdministrativeStatusAsyncResponse();
+        .createGetAdministrativeStatusAsyncResponse();
 
         asyncResponse.setCorrelationUid(correlationUid);
         asyncResponse.setDeviceIdentification(request.getDeviceIdentification());
@@ -162,7 +161,6 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
     @PayloadRoot(localPart = "GetAdministrativeStatusAsyncRequest", namespace = SMARTMETER_CONFIGURATION_NAMESPACE)
     @ResponsePayload
     public GetAdministrativeStatusResponse retrieveGetAdministrativeStatusResponse(
-            @OrganisationIdentification final String organisationIdentification,
             @RequestPayload final GetAdministrativeStatusAsyncRequest request) throws OsgpException {
 
         GetAdministrativeStatusResponse response = null;
@@ -208,9 +206,8 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
 
     @PayloadRoot(localPart = "SetSpecialDaysAsyncRequest", namespace = SMARTMETER_CONFIGURATION_NAMESPACE)
     @ResponsePayload
-    public SetSpecialDaysResponse getSetSpecialDaysResponse(
-            @OrganisationIdentification final String organisationIdentification,
-            @RequestPayload final SetSpecialDaysAsyncRequest request) throws OsgpException {
+    public SetSpecialDaysResponse getSetSpecialDaysResponse(@RequestPayload final SetSpecialDaysAsyncRequest request)
+            throws OsgpException {
 
         SetSpecialDaysResponse response = null;
         try {
@@ -255,7 +252,6 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
     @PayloadRoot(localPart = "SetConfigurationObjectAsyncRequest", namespace = SMARTMETER_CONFIGURATION_NAMESPACE)
     @ResponsePayload
     public SetConfigurationObjectResponse getSetConfigurationObjectResponse(
-            @OrganisationIdentification final String organisationIdentification,
             @RequestPayload final SetConfigurationObjectAsyncRequest request) throws OsgpException {
 
         SetConfigurationObjectResponse response = null;
@@ -301,7 +297,7 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
             @OrganisationIdentification final String organisationIdentification,
             @RequestPayload final SetEncryptionKeyExchangeOnGMeterRequest request,
             @MessagePriority final String messagePriority, @ScheduleTime final String scheduleTime)
-                    throws OsgpException {
+            throws OsgpException {
 
         LOGGER.info("Incoming SetEncryptionKeyExchangeOnGMeterRequest for meter: {}.",
                 request.getDeviceIdentification());
@@ -449,7 +445,7 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
         try {
             response = new SetActivityCalendarAsyncResponse();
             final String deviceIdentification = request.getDeviceIdentification();
-            final ActivityCalendarDataType requestData = request.getActivityCalendarData();
+            final SetActivityCalendarRequestData requestData = request.getActivityCalendarData();
 
             final ActivityCalendar activityCalendar = this.configurationMapper.map(requestData.getActivityCalendar(),
                     ActivityCalendar.class);
@@ -474,7 +470,6 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
     @PayloadRoot(localPart = "SetActivityCalendarAsyncRequest", namespace = SMARTMETER_CONFIGURATION_NAMESPACE)
     @ResponsePayload
     public SetActivityCalendarResponse getSetActivityCalendarResponse(
-            @OrganisationIdentification final String organisationIdentification,
             @RequestPayload final SetActivityCalendarAsyncRequest request) throws OsgpException {
 
         LOGGER.info("Incoming retrieveSetActivityCalendarResponse for meter: {}", request.getDeviceIdentification());
@@ -535,7 +530,6 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
     @PayloadRoot(localPart = "SetAlarmNotificationsAsyncRequest", namespace = SMARTMETER_CONFIGURATION_NAMESPACE)
     @ResponsePayload
     public SetAlarmNotificationsResponse getSetAlarmNotificationsResponse(
-            @OrganisationIdentification final String organisationIdentification,
             @RequestPayload final SetAlarmNotificationsAsyncRequest request) throws OsgpException {
 
         SetAlarmNotificationsResponse response = null;
@@ -562,8 +556,8 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
 
         ReplaceKeysAsyncResponse asyncResponse = null;
         try {
-            final com.alliander.osgp.domain.core.valueobjects.smartmetering.KeySet keySet = this.configurationMapper
-                    .map(request.getKeySet(), com.alliander.osgp.domain.core.valueobjects.smartmetering.KeySet.class);
+            final com.alliander.osgp.domain.core.valueobjects.smartmetering.SetKeysRequestData keySet = this.configurationMapper
+                    .map(request.getSetKeysRequestData(), com.alliander.osgp.domain.core.valueobjects.smartmetering.SetKeysRequestData.class);
 
             final String correlationUid = this.configurationService.enqueueReplaceKeysRequest(
                     organisationIdentification, request.getDeviceIdentification(), keySet,
@@ -571,7 +565,7 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
                     this.configurationMapper.map(scheduleTime, Long.class));
 
             asyncResponse = new com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.ObjectFactory()
-                    .createReplaceKeysAsyncResponse();
+            .createReplaceKeysAsyncResponse();
 
             asyncResponse.setCorrelationUid(correlationUid);
             asyncResponse.setDeviceIdentification(request.getDeviceIdentification());
@@ -584,9 +578,8 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
 
     @PayloadRoot(localPart = "ReplaceKeysAsyncRequest", namespace = SMARTMETER_CONFIGURATION_NAMESPACE)
     @ResponsePayload
-    public ReplaceKeysResponse getReplaceKeysResponse(
-            @OrganisationIdentification final String organisationIdentification,
-            @RequestPayload final ReplaceKeysAsyncRequest request) throws OsgpException {
+    public ReplaceKeysResponse getReplaceKeysResponse(@RequestPayload final ReplaceKeysAsyncRequest request)
+            throws OsgpException {
 
         ReplaceKeysResponse response = null;
         try {
