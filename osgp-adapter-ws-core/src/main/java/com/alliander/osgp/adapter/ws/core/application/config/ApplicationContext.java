@@ -39,7 +39,7 @@ import com.alliander.osgp.shared.application.config.PagingSettings;
  */
 @Configuration
 @ComponentScan(basePackages = { "com.alliander.osgp.domain.core", "com.alliander.osgp.adapter.ws.core",
-"com.alliander.osgp.domain.logging" })
+        "com.alliander.osgp.domain.logging" })
 @ImportResource("classpath:applicationContext.xml")
 @Import({ PersistenceConfig.class, WritablePersistenceConfig.class, ReadOnlyLoggingConfig.class, WebServiceConfig.class })
 @PropertySource("file:${osp/osgpAdapterWsCore/config}")
@@ -85,7 +85,7 @@ public class ApplicationContext {
     public PagingSettings pagingSettings() {
         return new PagingSettings(Integer.parseInt(this.environment
                 .getRequiredProperty(PROPERTY_NAME_PAGING_MAXIMUM_PAGE_SIZE)), Integer.parseInt(this.environment
-                        .getRequiredProperty(PROPERTY_NAME_PAGING_DEFAULT_PAGE_SIZE)));
+                .getRequiredProperty(PROPERTY_NAME_PAGING_DEFAULT_PAGE_SIZE)));
     }
 
     @Bean
@@ -96,7 +96,7 @@ public class ApplicationContext {
 
     @Bean
     public String firmwareDirectory() {
-        return this.environment.getProperty(PROPERTY_NAME_FIRMWARE_DIRECTORY);
+        return this.environment.getRequiredProperty(PROPERTY_NAME_FIRMWARE_DIRECTORY);
     }
 
     @Bean
