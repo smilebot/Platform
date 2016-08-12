@@ -9,6 +9,8 @@
  */
 package com.alliander.osgp.adapter.ws.smartmetering.endpoints;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +24,16 @@ import com.alliander.osgp.adapter.ws.endpointinterceptors.OrganisationIdentifica
 import com.alliander.osgp.adapter.ws.endpointinterceptors.ScheduleTime;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.common.AsyncResponse;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.common.OsgpResultType;
-import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.ActivityCalendarDataType;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.AdministrativeStatusType;
+import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.FirmwareVersion;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.GetAdministrativeStatusAsyncRequest;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.GetAdministrativeStatusAsyncResponse;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.GetAdministrativeStatusRequest;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.GetAdministrativeStatusResponse;
+import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.GetFirmwareVersionAsyncRequest;
+import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.GetFirmwareVersionAsyncResponse;
+import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.GetFirmwareVersionRequest;
+import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.GetFirmwareVersionResponse;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.ReplaceKeysAsyncRequest;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.ReplaceKeysAsyncResponse;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.ReplaceKeysRequest;
@@ -35,6 +41,7 @@ import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.ReplaceK
 import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.SetActivityCalendarAsyncRequest;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.SetActivityCalendarAsyncResponse;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.SetActivityCalendarRequest;
+import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.SetActivityCalendarRequestData;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.SetActivityCalendarResponse;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.SetAdministrativeStatusAsyncRequest;
 import com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.SetAdministrativeStatusAsyncResponse;
@@ -72,6 +79,7 @@ import com.alliander.osgp.adapter.ws.smartmetering.application.services.Configur
 import com.alliander.osgp.adapter.ws.smartmetering.domain.entities.MeterResponseData;
 import com.alliander.osgp.domain.core.valueobjects.smartmetering.ActivityCalendar;
 import com.alliander.osgp.domain.core.valueobjects.smartmetering.AlarmNotifications;
+import com.alliander.osgp.domain.core.valueobjects.smartmetering.FirmwareVersionResponse;
 import com.alliander.osgp.shared.exceptionhandling.OsgpException;
 import com.alliander.osgp.shared.wsheaderattribute.priority.MessagePriorityEnum;
 
@@ -88,6 +96,104 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
     private ConfigurationMapper configurationMapper;
 
     public SmartMeteringConfigurationEndpoint() {
+        // Default constructor
+    }
+
+    /**
+     *
+     * Starts the proces of retrieving the firmware version(s) of the device
+     * specified in the {@link GetFirmwareVersionRequest}
+     *
+     * @param organisationIdentification
+     *            {@link String} containing the identification of the
+     *            organization
+     * @param request
+     *            the {@link GetFirmwareVersionRequest}
+     * @param messagePriority
+     *            the message priority
+     * @param scheduleTime
+     *            the time the message is scheduled
+     * @return the {@link GetFirmwareVersionAsyncResponse} containing the
+     *         correlation id
+     * @throws OsgpException
+     */
+    @PayloadRoot(localPart = "GetFirmwareVersionRequest", namespace = SMARTMETER_CONFIGURATION_NAMESPACE)
+    @ResponsePayload
+    public GetFirmwareVersionAsyncResponse getFirmwareVersion(
+            @OrganisationIdentification final String organisationIdentification,
+            @RequestPayload final GetFirmwareVersionRequest request, @MessagePriority final String messagePriority,
+            @ScheduleTime final String scheduleTime) throws OsgpException {
+
+        LOGGER.info("GetFirmwareVersion Request received from organisation {} for device {}.",
+                organisationIdentification, request.getDeviceIdentification());
+
+        final GetFirmwareVersionAsyncResponse response = new com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.ObjectFactory()
+        .createGetFirmwareVersionAsyncResponse();
+
+        try {
+            final String correlationUid = this.configurationService.enqueueGetFirmwareRequest(
+                    organisationIdentification, request.getDeviceIdentification(),
+                    MessagePriorityEnum.getMessagePriority(messagePriority),
+                    this.configurationMapper.map(scheduleTime, Long.class));
+            response.setCorrelationUid(correlationUid);
+            response.setDeviceIdentification(request.getDeviceIdentification());
+        } catch (final Exception e) {
+            this.handleException(e);
+        }
+
+        return response;
+    }
+
+    /**
+     * Gets the Firmware version response from the database (if it is there) and
+     * returns {@link GetFirmwareVersionResponse} containing those firmware
+     * versions.
+     *
+     * @param organisationIdentification
+     *            {@link String} containing the identification of the
+     *            organization
+     * @param request
+     *            {@link GetFirmwareVersionAsyncRequest} containing the
+     *            correlation id as the response identifier
+     * @return {@link GetFirmwareVersionResponse} containing the firmware
+     *         version(s) for the device.
+     * @throws OsgpException
+     *             is thrown when the correlationId cannot be found in the
+     *             database
+     */
+    @PayloadRoot(localPart = "GetFirmwareVersionAsyncRequest", namespace = SMARTMETER_CONFIGURATION_NAMESPACE)
+    @ResponsePayload
+    public GetFirmwareVersionResponse getGetFirmwareVersionResponse(
+            @OrganisationIdentification final String organisationIdentification,
+            @RequestPayload final GetFirmwareVersionAsyncRequest request) throws OsgpException {
+
+        LOGGER.info("GetFirmwareVersionResponse Request received from organisation {} for device: {}.",
+                organisationIdentification, request.getDeviceIdentification());
+
+        final GetFirmwareVersionResponse response = new com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.ObjectFactory()
+                .createGetFirmwareVersionResponse();
+
+        try {
+            final MeterResponseData meterResponseData = this.configurationService.dequeueGetFirmwareResponse(request
+                    .getCorrelationUid());
+            if (meterResponseData != null) {
+                response.setResult(OsgpResultType.fromValue(meterResponseData.getResultType().getValue()));
+
+                if (meterResponseData.getMessageData() != null) {
+                    final List<FirmwareVersion> target = response.getFirmwareVersion();
+                    final FirmwareVersionResponse firmwareVersionResponse = (FirmwareVersionResponse) meterResponseData
+                            .getMessageData();
+                    target.addAll(this.configurationMapper.mapAsList(firmwareVersionResponse.getFirmwareVersions(),
+                            FirmwareVersion.class));
+                } else {
+                    LOGGER.info("Get Firmware Version firmware is null");
+                }
+            }
+        } catch (final Exception e) {
+            this.handleException(e);
+        }
+
+        return response;
     }
 
     @PayloadRoot(localPart = "SetAdministrativeStatusRequest", namespace = SMARTMETER_CONFIGURATION_NAMESPACE)
@@ -118,7 +224,6 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
     @PayloadRoot(localPart = "SetAdministrativeStatusAsyncRequest", namespace = SMARTMETER_CONFIGURATION_NAMESPACE)
     @ResponsePayload
     public SetAdministrativeStatusResponse retrieveSetAdministrativeStatusResponse(
-            @OrganisationIdentification final String organisationIdentification,
             @RequestPayload final SetAdministrativeStatusAsyncRequest request) throws OsgpException {
 
         SetAdministrativeStatusResponse response = null;
@@ -151,7 +256,7 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
                 this.configurationMapper.map(scheduleTime, Long.class));
 
         final GetAdministrativeStatusAsyncResponse asyncResponse = new com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.ObjectFactory()
-                .createGetAdministrativeStatusAsyncResponse();
+        .createGetAdministrativeStatusAsyncResponse();
 
         asyncResponse.setCorrelationUid(correlationUid);
         asyncResponse.setDeviceIdentification(request.getDeviceIdentification());
@@ -162,7 +267,6 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
     @PayloadRoot(localPart = "GetAdministrativeStatusAsyncRequest", namespace = SMARTMETER_CONFIGURATION_NAMESPACE)
     @ResponsePayload
     public GetAdministrativeStatusResponse retrieveGetAdministrativeStatusResponse(
-            @OrganisationIdentification final String organisationIdentification,
             @RequestPayload final GetAdministrativeStatusAsyncRequest request) throws OsgpException {
 
         GetAdministrativeStatusResponse response = null;
@@ -208,9 +312,8 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
 
     @PayloadRoot(localPart = "SetSpecialDaysAsyncRequest", namespace = SMARTMETER_CONFIGURATION_NAMESPACE)
     @ResponsePayload
-    public SetSpecialDaysResponse getSetSpecialDaysResponse(
-            @OrganisationIdentification final String organisationIdentification,
-            @RequestPayload final SetSpecialDaysAsyncRequest request) throws OsgpException {
+    public SetSpecialDaysResponse getSetSpecialDaysResponse(@RequestPayload final SetSpecialDaysAsyncRequest request)
+            throws OsgpException {
 
         SetSpecialDaysResponse response = null;
         try {
@@ -255,7 +358,6 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
     @PayloadRoot(localPart = "SetConfigurationObjectAsyncRequest", namespace = SMARTMETER_CONFIGURATION_NAMESPACE)
     @ResponsePayload
     public SetConfigurationObjectResponse getSetConfigurationObjectResponse(
-            @OrganisationIdentification final String organisationIdentification,
             @RequestPayload final SetConfigurationObjectAsyncRequest request) throws OsgpException {
 
         SetConfigurationObjectResponse response = null;
@@ -449,7 +551,7 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
         try {
             response = new SetActivityCalendarAsyncResponse();
             final String deviceIdentification = request.getDeviceIdentification();
-            final ActivityCalendarDataType requestData = request.getActivityCalendarData();
+            final SetActivityCalendarRequestData requestData = request.getActivityCalendarData();
 
             final ActivityCalendar activityCalendar = this.configurationMapper.map(requestData.getActivityCalendar(),
                     ActivityCalendar.class);
@@ -474,7 +576,6 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
     @PayloadRoot(localPart = "SetActivityCalendarAsyncRequest", namespace = SMARTMETER_CONFIGURATION_NAMESPACE)
     @ResponsePayload
     public SetActivityCalendarResponse getSetActivityCalendarResponse(
-            @OrganisationIdentification final String organisationIdentification,
             @RequestPayload final SetActivityCalendarAsyncRequest request) throws OsgpException {
 
         LOGGER.info("Incoming retrieveSetActivityCalendarResponse for meter: {}", request.getDeviceIdentification());
@@ -535,7 +636,6 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
     @PayloadRoot(localPart = "SetAlarmNotificationsAsyncRequest", namespace = SMARTMETER_CONFIGURATION_NAMESPACE)
     @ResponsePayload
     public SetAlarmNotificationsResponse getSetAlarmNotificationsResponse(
-            @OrganisationIdentification final String organisationIdentification,
             @RequestPayload final SetAlarmNotificationsAsyncRequest request) throws OsgpException {
 
         SetAlarmNotificationsResponse response = null;
@@ -562,8 +662,9 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
 
         ReplaceKeysAsyncResponse asyncResponse = null;
         try {
-            final com.alliander.osgp.domain.core.valueobjects.smartmetering.KeySet keySet = this.configurationMapper
-                    .map(request.getKeySet(), com.alliander.osgp.domain.core.valueobjects.smartmetering.KeySet.class);
+            final com.alliander.osgp.domain.core.valueobjects.smartmetering.SetKeysRequestData keySet = this.configurationMapper
+                    .map(request.getSetKeysRequestData(),
+                            com.alliander.osgp.domain.core.valueobjects.smartmetering.SetKeysRequestData.class);
 
             final String correlationUid = this.configurationService.enqueueReplaceKeysRequest(
                     organisationIdentification, request.getDeviceIdentification(), keySet,
@@ -571,7 +672,7 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
                     this.configurationMapper.map(scheduleTime, Long.class));
 
             asyncResponse = new com.alliander.osgp.adapter.ws.schema.smartmetering.configuration.ObjectFactory()
-                    .createReplaceKeysAsyncResponse();
+            .createReplaceKeysAsyncResponse();
 
             asyncResponse.setCorrelationUid(correlationUid);
             asyncResponse.setDeviceIdentification(request.getDeviceIdentification());
@@ -584,9 +685,8 @@ public class SmartMeteringConfigurationEndpoint extends SmartMeteringEndpoint {
 
     @PayloadRoot(localPart = "ReplaceKeysAsyncRequest", namespace = SMARTMETER_CONFIGURATION_NAMESPACE)
     @ResponsePayload
-    public ReplaceKeysResponse getReplaceKeysResponse(
-            @OrganisationIdentification final String organisationIdentification,
-            @RequestPayload final ReplaceKeysAsyncRequest request) throws OsgpException {
+    public ReplaceKeysResponse getReplaceKeysResponse(@RequestPayload final ReplaceKeysAsyncRequest request)
+            throws OsgpException {
 
         ReplaceKeysResponse response = null;
         try {

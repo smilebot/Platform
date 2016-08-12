@@ -33,12 +33,13 @@ import com.alliander.osgp.domain.core.valueobjects.LightValue;
 import com.alliander.osgp.domain.core.valueobjects.RelayType;
 import com.alliander.osgp.domain.core.valueobjects.TariffValue;
 import com.alliander.osgp.domain.core.valueobjects.TransitionType;
-import com.alliander.osgp.dto.valueobjects.LightValueMessageDataContainer;
-import com.alliander.osgp.dto.valueobjects.ResumeScheduleMessageDataContainer;
-import com.alliander.osgp.dto.valueobjects.TransitionMessageDataContainer;
+import com.alliander.osgp.dto.valueobjects.LightValueMessageDataContainerDto;
+import com.alliander.osgp.dto.valueobjects.ResumeScheduleMessageDataContainerDto;
+import com.alliander.osgp.dto.valueobjects.TransitionMessageDataContainerDto;
 import com.alliander.osgp.shared.exceptionhandling.ComponentType;
 import com.alliander.osgp.shared.exceptionhandling.FunctionalException;
 import com.alliander.osgp.shared.exceptionhandling.FunctionalExceptionType;
+import com.alliander.osgp.shared.exceptionhandling.NoDeviceResponseException;
 import com.alliander.osgp.shared.exceptionhandling.OsgpException;
 import com.alliander.osgp.shared.exceptionhandling.TechnicalException;
 import com.alliander.osgp.shared.infra.jms.RequestMessage;
@@ -73,9 +74,9 @@ public class AdHocManagementService extends AbstractService {
         this.findOrganisation(organisationIdentification);
         final Device device = this.findActiveDevice(deviceIdentification);
 
-        final List<com.alliander.osgp.dto.valueobjects.LightValue> lightValuesDto = this.domainCoreMapper.mapAsList(
-                lightValues, com.alliander.osgp.dto.valueobjects.LightValue.class);
-        final LightValueMessageDataContainer lightValueMessageDataContainer = new LightValueMessageDataContainer(
+        final List<com.alliander.osgp.dto.valueobjects.LightValueDto> lightValuesDto = this.domainCoreMapper.mapAsList(
+                lightValues, com.alliander.osgp.dto.valueobjects.LightValueDto.class);
+        final LightValueMessageDataContainerDto lightValueMessageDataContainer = new LightValueMessageDataContainerDto(
                 lightValuesDto);
 
         this.osgpCoreRequestMessageSender.send(new RequestMessage(correlationUid, organisationIdentification,
@@ -106,14 +107,14 @@ public class AdHocManagementService extends AbstractService {
         this.findOrganisation(organisationIdentification);
         final Device device = this.findActiveDevice(deviceIdentification);
 
-        final com.alliander.osgp.dto.valueobjects.DomainType allowedDomainTypeDto = this.domainCoreMapper.map(
-                allowedDomainType, com.alliander.osgp.dto.valueobjects.DomainType.class);
+        final com.alliander.osgp.dto.valueobjects.DomainTypeDto allowedDomainTypeDto = this.domainCoreMapper.map(
+                allowedDomainType, com.alliander.osgp.dto.valueobjects.DomainTypeDto.class);
 
         this.osgpCoreRequestMessageSender.send(new RequestMessage(correlationUid, organisationIdentification,
                 deviceIdentification, allowedDomainTypeDto), messageType, device.getIpAddress());
     }
 
-    public void handleGetStatusResponse(final com.alliander.osgp.dto.valueobjects.DeviceStatus deviceStatusDto,
+    public void handleGetStatusResponse(final com.alliander.osgp.dto.valueobjects.DeviceStatusDto deviceStatusDto,
             final DomainType allowedDomainType, final String deviceIdentification,
             final String organisationIdentification, final String correlationUid, final String messageType,
             final ResponseMessageResultType deviceResult, final OsgpException exception) {
@@ -141,16 +142,23 @@ public class AdHocManagementService extends AbstractService {
                 dosMap.put(dos.getExternalId(), dos);
             }
 
-            deviceStatusMapped = new DeviceStatusMapped(filterTariffValues(status.getLightValues(), dosMap,
-                    allowedDomainType), filterLightValues(status.getLightValues(), dosMap, allowedDomainType),
-                    status.getPreferredLinkType(), status.getActualLinkType(), status.getLightType(),
-                    status.getEventNotificationsMask());
-
+            if (status != null) {
+                deviceStatusMapped = new DeviceStatusMapped(filterTariffValues(status.getLightValues(), dosMap,
+                        allowedDomainType), filterLightValues(status.getLightValues(), dosMap, allowedDomainType),
+                        status.getPreferredLinkType(), status.getActualLinkType(), status.getLightType(),
+                        status.getEventNotificationsMask());
+            } else {
+                result = ResponseMessageResultType.NOT_OK;
+                osgpException = new TechnicalException(ComponentType.DOMAIN_PUBLIC_LIGHTING,
+                        "Device was not able to report status", new NoDeviceResponseException());
+            }
+        } catch (final OsgpException ex) {
+            osgpException = ex;
         } catch (final Exception e) {
             LOGGER.error("Unexpected Exception", e);
             result = ResponseMessageResultType.NOT_OK;
-            osgpException = new TechnicalException(ComponentType.UNKNOWN,
-                    "Unexpected exception while retrieving response message", e);
+            osgpException = new TechnicalException(ComponentType.DOMAIN_PUBLIC_LIGHTING,
+                    "Exception occurred while getting device status", e);
         }
 
         this.webServiceResponseMessageSender.send(new ResponseMessage(correlationUid, organisationIdentification,
@@ -173,7 +181,7 @@ public class AdHocManagementService extends AbstractService {
                             "Device %1$s does not have a schedule.", deviceIdentification)));
         }
 
-        final ResumeScheduleMessageDataContainer resumeScheduleMessageDataContainerDto = new ResumeScheduleMessageDataContainer(
+        final ResumeScheduleMessageDataContainerDto resumeScheduleMessageDataContainerDto = new ResumeScheduleMessageDataContainerDto(
                 index, isImmediate);
 
         this.osgpCoreRequestMessageSender.send(new RequestMessage(correlationUid, organisationIdentification,
@@ -192,8 +200,8 @@ public class AdHocManagementService extends AbstractService {
         this.findOrganisation(organisationIdentification);
         final Device device = this.findActiveDevice(deviceIdentification);
 
-        final TransitionMessageDataContainer transitionMessageDataContainerDto = new TransitionMessageDataContainer(
-                this.domainCoreMapper.map(transitionType, com.alliander.osgp.dto.valueobjects.TransitionType.class),
+        final TransitionMessageDataContainerDto transitionMessageDataContainerDto = new TransitionMessageDataContainerDto(
+                this.domainCoreMapper.map(transitionType, com.alliander.osgp.dto.valueobjects.TransitionTypeDto.class),
                 transitionTime);
 
         this.osgpCoreRequestMessageSender.send(new RequestMessage(correlationUid, organisationIdentification,

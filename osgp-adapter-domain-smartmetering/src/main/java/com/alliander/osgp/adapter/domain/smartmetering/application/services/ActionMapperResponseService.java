@@ -28,26 +28,26 @@ import com.alliander.osgp.domain.core.valueobjects.smartmetering.ActionResponse;
 import com.alliander.osgp.domain.core.valueobjects.smartmetering.AdministrativeStatusTypeResponse;
 import com.alliander.osgp.domain.core.valueobjects.smartmetering.AlarmRegister;
 import com.alliander.osgp.domain.core.valueobjects.smartmetering.AssociationLnObjectsResponseData;
-import com.alliander.osgp.domain.core.valueobjects.smartmetering.BundleResponseMessageDataContainer;
-import com.alliander.osgp.domain.core.valueobjects.smartmetering.EventMessageDataContainer;
-import com.alliander.osgp.domain.core.valueobjects.smartmetering.FirmwareVersionResponseContainer;
-import com.alliander.osgp.domain.core.valueobjects.smartmetering.GetConfigurationResponseContainer;
+import com.alliander.osgp.domain.core.valueobjects.smartmetering.BundleMessagesResponse;
+import com.alliander.osgp.domain.core.valueobjects.smartmetering.EventMessagesResponse;
+import com.alliander.osgp.domain.core.valueobjects.smartmetering.FirmwareVersionResponse;
+import com.alliander.osgp.domain.core.valueobjects.smartmetering.GetConfigurationResponse;
 import com.alliander.osgp.domain.core.valueobjects.smartmetering.MeterReads;
 import com.alliander.osgp.domain.core.valueobjects.smartmetering.MeterReadsGas;
 import com.alliander.osgp.domain.core.valueobjects.smartmetering.PeriodicMeterReadsContainer;
 import com.alliander.osgp.domain.core.valueobjects.smartmetering.PeriodicMeterReadsContainerGas;
 import com.alliander.osgp.dto.valueobjects.smartmetering.ActionResponseDto;
 import com.alliander.osgp.dto.valueobjects.smartmetering.AdministrativeStatusTypeResponseDto;
-import com.alliander.osgp.dto.valueobjects.smartmetering.AlarmRegisterDto;
-import com.alliander.osgp.dto.valueobjects.smartmetering.AssociationLnObjectsResponseDataDto;
-import com.alliander.osgp.dto.valueobjects.smartmetering.BundleResponseMessageDataContainerDto;
-import com.alliander.osgp.dto.valueobjects.smartmetering.EventMessageDataContainerDto;
-import com.alliander.osgp.dto.valueobjects.smartmetering.FirmwareVersionResponseDataDto;
-import com.alliander.osgp.dto.valueobjects.smartmetering.GetConfigurationResponseDataDto;
-import com.alliander.osgp.dto.valueobjects.smartmetering.MeterReadsDto;
-import com.alliander.osgp.dto.valueobjects.smartmetering.MeterReadsGasDto;
-import com.alliander.osgp.dto.valueobjects.smartmetering.PeriodicMeterReadsContainerDto;
-import com.alliander.osgp.dto.valueobjects.smartmetering.PeriodicMeterReadsContainerGasDto;
+import com.alliander.osgp.dto.valueobjects.smartmetering.AlarmRegisterResponseDto;
+import com.alliander.osgp.dto.valueobjects.smartmetering.AssociationLnObjectsResponseDto;
+import com.alliander.osgp.dto.valueobjects.smartmetering.BundleMessagesRequestDto;
+import com.alliander.osgp.dto.valueobjects.smartmetering.EventMessageDataResponseDto;
+import com.alliander.osgp.dto.valueobjects.smartmetering.FirmwareVersionResponseDto;
+import com.alliander.osgp.dto.valueobjects.smartmetering.GetConfigurationResponseDto;
+import com.alliander.osgp.dto.valueobjects.smartmetering.MeterReadsGasResponseDto;
+import com.alliander.osgp.dto.valueobjects.smartmetering.MeterReadsResponseDto;
+import com.alliander.osgp.dto.valueobjects.smartmetering.PeriodicMeterReadGasResponseDto;
+import com.alliander.osgp.dto.valueobjects.smartmetering.PeriodicMeterReadsResponseDto;
 import com.alliander.osgp.shared.exceptionhandling.ComponentType;
 import com.alliander.osgp.shared.exceptionhandling.FunctionalException;
 import com.alliander.osgp.shared.exceptionhandling.FunctionalExceptionType;
@@ -68,51 +68,51 @@ public class ActionMapperResponseService {
     @Autowired
     private CommonMapper commonMapper;
 
-    /**
-     * Specifies which mapper to use for the DTO class received.
-     */
-    private static Map<Class<? extends ActionResponseDto>, ConfigurableMapper> classToMapperMap = new HashMap<>();
-
-    @PostConstruct
-    private void postConstruct() {
-        classToMapperMap.put(EventMessageDataContainerDto.class, this.managementMapper);
-        classToMapperMap.put(MeterReadsDto.class, this.monitoringMapper);
-        classToMapperMap.put(MeterReadsGasDto.class, this.monitoringMapper);
-        classToMapperMap.put(ActionResponseDto.class, this.commonMapper);
-        classToMapperMap.put(AlarmRegisterDto.class, this.commonMapper);
-        classToMapperMap.put(AdministrativeStatusTypeResponseDto.class, this.configurationMapper);
-        classToMapperMap.put(PeriodicMeterReadsContainerDto.class, this.monitoringMapper);
-        classToMapperMap.put(PeriodicMeterReadsContainerGasDto.class, this.monitoringMapper);
-        classToMapperMap.put(GetConfigurationResponseDataDto.class, this.configurationMapper);
-        classToMapperMap.put(FirmwareVersionResponseDataDto.class, this.configurationMapper);
-        classToMapperMap.put(AssociationLnObjectsResponseDataDto.class, this.commonMapper);
-    }
-
+    private static Map<Class<? extends ActionResponseDto>, ConfigurableMapper> classToMapperMap = new HashMap<>();  
+    private static Map<Class<? extends ActionResponseDto>, Class<? extends ActionResponse>> classMap = new HashMap<>();
+    
     /**
      * Specifies to which core value object the DTO object needs to be mapped.
      */
-    private static Map<Class<? extends ActionResponseDto>, Class<? extends ActionResponse>> classMap = new HashMap<>();
     static {
-        classMap.put(EventMessageDataContainerDto.class, EventMessageDataContainer.class);
-        classMap.put(MeterReadsDto.class, MeterReads.class);
-        classMap.put(MeterReadsGasDto.class, MeterReadsGas.class);
+        classMap.put(EventMessageDataResponseDto.class, EventMessagesResponse.class);
+        classMap.put(MeterReadsResponseDto.class, MeterReads.class);
+        classMap.put(MeterReadsGasResponseDto.class, MeterReadsGas.class);
         classMap.put(ActionResponseDto.class, ActionResponse.class);
-        classMap.put(AlarmRegisterDto.class, AlarmRegister.class);
+        classMap.put(AlarmRegisterResponseDto.class, AlarmRegister.class);
         classMap.put(AdministrativeStatusTypeResponseDto.class, AdministrativeStatusTypeResponse.class);
-        classMap.put(PeriodicMeterReadsContainerDto.class, PeriodicMeterReadsContainer.class);
-        classMap.put(PeriodicMeterReadsContainerGasDto.class, PeriodicMeterReadsContainerGas.class);
-        classMap.put(GetConfigurationResponseDataDto.class, GetConfigurationResponseContainer.class);
-        classMap.put(FirmwareVersionResponseDataDto.class, FirmwareVersionResponseContainer.class);
-        classMap.put(AssociationLnObjectsResponseDataDto.class, AssociationLnObjectsResponseData.class);
+        classMap.put(PeriodicMeterReadsResponseDto.class, PeriodicMeterReadsContainer.class);
+        classMap.put(PeriodicMeterReadGasResponseDto.class, PeriodicMeterReadsContainerGas.class);
+        classMap.put(GetConfigurationResponseDto.class, GetConfigurationResponse.class);
+        classMap.put(FirmwareVersionResponseDto.class, FirmwareVersionResponse.class);
+        classMap.put(AssociationLnObjectsResponseDto.class, AssociationLnObjectsResponseData.class);
     }
 
-    public BundleResponseMessageDataContainer mapAllActions(
-            final BundleResponseMessageDataContainerDto bundleResponseMessageDataContainerDto)
+    /**
+     * Specifies which mapper to use for the DTO class received.
+     */
+    @PostConstruct
+    private void postConstruct() {
+        classToMapperMap.put(EventMessageDataResponseDto.class, this.managementMapper);
+        classToMapperMap.put(MeterReadsResponseDto.class, this.monitoringMapper);
+        classToMapperMap.put(MeterReadsGasResponseDto.class, this.monitoringMapper);
+        classToMapperMap.put(ActionResponseDto.class, this.commonMapper);
+        classToMapperMap.put(AlarmRegisterResponseDto.class, this.commonMapper);
+        classToMapperMap.put(AdministrativeStatusTypeResponseDto.class, this.configurationMapper);
+        classToMapperMap.put(PeriodicMeterReadsResponseDto.class, this.monitoringMapper);
+        classToMapperMap.put(PeriodicMeterReadGasResponseDto.class, this.monitoringMapper);
+        classToMapperMap.put(GetConfigurationResponseDto.class, this.configurationMapper);
+        classToMapperMap.put(FirmwareVersionResponseDto.class, this.configurationMapper);
+        classToMapperMap.put(AssociationLnObjectsResponseDto.class, this.commonMapper);
+    }
+
+    public BundleMessagesResponse mapAllActions(
+            final BundleMessagesRequestDto bundleMessageResponseDto)
             throws FunctionalException {
 
         final List<ActionResponse> actionResponseList = new ArrayList<ActionResponse>();
 
-        for (final ActionResponseDto action : bundleResponseMessageDataContainerDto.getActionValueObjectResponseDto()) {
+        for (final ActionResponseDto action : bundleMessageResponseDto.getAllResponses()) {
 
             final ConfigurableMapper mapper = this.getMapper(action);
             final Class<? extends ActionResponse> clazz = this.getClazz(action);
@@ -121,7 +121,7 @@ public class ActionMapperResponseService {
             actionResponseList.add(actionValueResponseObject);
         }
 
-        return new BundleResponseMessageDataContainer(actionResponseList);
+        return new BundleMessagesResponse(actionResponseList);
 
     }
 

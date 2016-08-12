@@ -7,6 +7,7 @@
  */
 package com.alliander.osgp.adapter.ws.smartmetering.application.config;
 
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -15,6 +16,7 @@ import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -39,7 +41,9 @@ import com.alliander.osgp.adapter.ws.endpointinterceptors.SoapHeaderScheduleTime
 import com.alliander.osgp.adapter.ws.endpointinterceptors.X509CertificateRdnAttributeValueEndpointInterceptor;
 import com.alliander.osgp.adapter.ws.smartmetering.application.exceptionhandling.DetailSoapFaultMappingExceptionResolver;
 import com.alliander.osgp.adapter.ws.smartmetering.application.exceptionhandling.SoapFaultMapper;
-import com.alliander.osgp.adapter.ws.smartmetering.application.mapping.NotificationMapper;
+import com.alliander.osgp.adapter.ws.smartmetering.application.services.NotificationService;
+import com.alliander.osgp.adapter.ws.smartmetering.application.services.NotificationServiceBlackHole;
+import com.alliander.osgp.adapter.ws.smartmetering.application.services.NotificationServiceWs;
 import com.alliander.osgp.adapter.ws.smartmetering.infra.ws.SendNotificationServiceClient;
 import com.alliander.osgp.adapter.ws.smartmetering.infra.ws.WebServiceTemplateFactory;
 
@@ -47,12 +51,39 @@ import com.alliander.osgp.adapter.ws.smartmetering.infra.ws.WebServiceTemplateFa
 @PropertySource("file:${osp/osgpAdapterWsSmartMetering/config}")
 public class WebServiceConfig {
 
-    private static final String PROPERTY_NAME_MARSHALLER_CONTEXT_PATH_SMART_METERING_MANAGEMENT = "jaxb2.marshaller.context.path.smartmetering.management";
-    private static final String PROPERTY_NAME_MARSHALLER_CONTEXT_PATH_SMART_METERING_BUNDLE = "jaxb2.marshaller.context.path.smartmetering.bundle";
-    private static final String PROPERTY_NAME_MARSHALLER_CONTEXT_PATH_SMART_METERING_INSTALLATION = "jaxb2.marshaller.context.path.smartmetering.installation";
-    private static final String PROPERTY_NAME_MARSHALLER_CONTEXT_PATH_SMART_METERING_MONITORING = "jaxb2.marshaller.context.path.smartmetering.monitoring";
-    private static final String PROPERTY_NAME_MARSHALLER_CONTEXT_PATH_SMART_METERING_ADHOC = "jaxb2.marshaller.context.path.smartmetering.adhoc";
-    private static final String PROPERTY_NAME_MARSHALLER_CONTEXT_PATH_SMART_METERING_CONFIGURATION = "jaxb2.marshaller.context.path.smartmetering.configuration";
+    @Value("${jaxb2.marshaller.context.path.smartmetering.adhoc}")
+    private String marshallerContextPathAdhoc;
+    @Value("${jaxb2.marshaller.context.path.smartmetering.bundle}")
+    private String marshallerContextPathBundle;
+    @Value("${jaxb2.marshaller.context.path.smartmetering.configuration}")
+    private String marshallerContextPathConfiguration;
+    @Value("${jaxb2.marshaller.context.path.smartmetering.installation}")
+    private String marshallerContextPathInstallation;
+    @Value("${jaxb2.marshaller.context.path.smartmetering.management}")
+    private String marshallerContextPathManagement;
+    @Value("${jaxb2.marshaller.context.path.smartmetering.monitoring}")
+    private String marshallerContextPathMonitoring;
+    @Value("${jaxb2.marshaller.context.path.smartmetering.notification}")
+    private String marshallerContextPathNotification;
+
+    @Value("${web.service.truststore.location}")
+    private String webserviceTruststoreLocation;
+    @Value("${web.service.truststore.password}")
+    private String webserviceTruststorePassword;
+    @Value("${web.service.truststore.type}")
+    private String webserviceTruststoreType;
+
+    @Value("${web.service.keystore.location}")
+    private String webserviceKeystoreLocation;
+    @Value("${web.service.keystore.password}")
+    private String webserviceKeystorePassword;
+    @Value("${web.service.keystore.type}")
+    private String webserviceKeystoreType;
+
+    @Value("${web.service.notification.url:#{null}}")
+    private String webserviceNotificationUrl;
+    @Value("${application.name}")
+    private String applicationName;
 
     private static final String ORGANISATION_IDENTIFICATION_HEADER = "OrganisationIdentification";
     private static final String ORGANISATION_IDENTIFICATION_CONTEXT = ORGANISATION_IDENTIFICATION_HEADER;
@@ -63,19 +94,6 @@ public class WebServiceConfig {
 
     private static final String X509_RDN_ATTRIBUTE_ID = "cn";
     private static final String X509_RDN_ATTRIBUTE_VALUE_CONTEXT_PROPERTY_NAME = "CommonNameSet";
-
-    private static final String PROPERTY_NAME_APPLICATION_NAME = "application.name";
-
-    private static final String PROPERTY_NAME_WEBSERVICE_TRUSTSTORE_LOCATION = "web.service.truststore.location";
-    private static final String PROPERTY_NAME_WEBSERVICE_TRUSTSTORE_PASSWORD = "web.service.truststore.password";
-    private static final String PROPERTY_NAME_WEBSERVICE_TRUSTSTORE_TYPE = "web.service.truststore.type";
-    private static final String PROPERTY_NAME_WEBSERVICE_KEYSTORE_LOCATION = "web.service.keystore.location";
-    private static final String PROPERTY_NAME_WEBSERVICE_KEYSTORE_PASSWORD = "web.service.keystore.password";
-    private static final String PROPERTY_NAME_WEBSERVICE_KEYSTORE_TYPE = "web.service.keystore.type";
-
-    private static final String PROPERTY_NAME_WEBSERVICE_NOTIFICATION_URL = "web.service.notification.url";
-
-    private static final String PROPERTY_NAME_MARSHALLER_CONTEXT_PATH_SMARTMETERING_NOTIFICATION = "jaxb2.marshaller.context.path.smartmetering.notification";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebServiceConfig.class);
 
@@ -92,10 +110,9 @@ public class WebServiceConfig {
     @Bean
     public KeyStoreFactoryBean webServiceTrustStoreFactory() {
         final KeyStoreFactoryBean factory = new KeyStoreFactoryBean();
-        factory.setType(this.environment.getProperty(PROPERTY_NAME_WEBSERVICE_TRUSTSTORE_TYPE));
-        factory.setLocation(new FileSystemResource(this.environment
-                .getProperty(PROPERTY_NAME_WEBSERVICE_TRUSTSTORE_LOCATION)));
-        factory.setPassword(this.environment.getProperty(PROPERTY_NAME_WEBSERVICE_TRUSTSTORE_PASSWORD));
+        factory.setType(this.webserviceTruststoreType);
+        factory.setLocation(new FileSystemResource(this.webserviceTruststoreLocation));
+        factory.setPassword(this.webserviceTruststorePassword);
 
         return factory;
     }
@@ -103,34 +120,34 @@ public class WebServiceConfig {
     @Bean
     public Jaxb2Marshaller notificationSenderMarshaller() {
         final Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-        marshaller.setContextPath(this.environment
-                .getRequiredProperty(PROPERTY_NAME_MARSHALLER_CONTEXT_PATH_SMARTMETERING_NOTIFICATION));
+        marshaller.setContextPath(this.marshallerContextPathNotification);
         return marshaller;
     }
 
     @Bean
     public SendNotificationServiceClient sendNotificationServiceClient() throws java.security.GeneralSecurityException {
         return new SendNotificationServiceClient(this.createWebServiceTemplateFactory(this
-                .notificationSenderMarshaller()), this.notificationMapper());
+                .notificationSenderMarshaller()));
     }
 
     private WebServiceTemplateFactory createWebServiceTemplateFactory(final Jaxb2Marshaller marshaller) {
-        return new WebServiceTemplateFactory(marshaller, this.messageFactory(),
-                this.environment.getProperty(PROPERTY_NAME_WEBSERVICE_KEYSTORE_TYPE),
-                this.environment.getProperty(PROPERTY_NAME_WEBSERVICE_KEYSTORE_LOCATION),
-                this.environment.getProperty(PROPERTY_NAME_WEBSERVICE_KEYSTORE_PASSWORD),
-                this.webServiceTrustStoreFactory(),
-                this.environment.getRequiredProperty(PROPERTY_NAME_APPLICATION_NAME));
+        return new WebServiceTemplateFactory(marshaller, this.messageFactory(), this.webserviceKeystoreType,
+                this.webserviceKeystoreLocation, this.webserviceKeystorePassword, this.webServiceTrustStoreFactory(),
+                this.applicationName);
     }
 
     @Bean
-    public NotificationMapper notificationMapper() {
-        return new NotificationMapper();
+    public String notificationUrl() {
+        return this.webserviceNotificationUrl;
     }
 
     @Bean
-    public String notificationURL() {
-        return this.environment.getRequiredProperty(PROPERTY_NAME_WEBSERVICE_NOTIFICATION_URL);
+    public NotificationService wsSmartMeteringNotificationService() throws GeneralSecurityException {
+        if (this.notificationUrl() != null) {
+            return new NotificationServiceWs(this.sendNotificationServiceClient(), this.notificationUrl());
+        } else {
+            return new NotificationServiceBlackHole();
+        }
     }
 
     // Client WS code
@@ -144,8 +161,7 @@ public class WebServiceConfig {
     public Jaxb2Marshaller smartMeteringManagementMarshaller() {
         final Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 
-        marshaller.setContextPath(this.environment
-                .getRequiredProperty(PROPERTY_NAME_MARSHALLER_CONTEXT_PATH_SMART_METERING_MANAGEMENT));
+        marshaller.setContextPath(this.marshallerContextPathManagement);
 
         return marshaller;
     }
@@ -171,8 +187,7 @@ public class WebServiceConfig {
     public Jaxb2Marshaller smartMeteringBundleMarshaller() {
         final Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 
-        marshaller.setContextPath(this.environment
-                .getRequiredProperty(PROPERTY_NAME_MARSHALLER_CONTEXT_PATH_SMART_METERING_BUNDLE));
+        marshaller.setContextPath(this.marshallerContextPathBundle);
 
         return marshaller;
     }
@@ -198,8 +213,7 @@ public class WebServiceConfig {
     public Jaxb2Marshaller smartMeteringInstallationMarshaller() {
         final Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 
-        marshaller.setContextPath(this.environment
-                .getRequiredProperty(PROPERTY_NAME_MARSHALLER_CONTEXT_PATH_SMART_METERING_INSTALLATION));
+        marshaller.setContextPath(this.marshallerContextPathInstallation);
 
         return marshaller;
     }
@@ -225,8 +239,7 @@ public class WebServiceConfig {
     public Jaxb2Marshaller smartMeteringMonitoringMarshaller() {
         final Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 
-        marshaller.setContextPath(this.environment
-                .getRequiredProperty(PROPERTY_NAME_MARSHALLER_CONTEXT_PATH_SMART_METERING_MONITORING));
+        marshaller.setContextPath(this.marshallerContextPathMonitoring);
 
         return marshaller;
     }
@@ -240,8 +253,7 @@ public class WebServiceConfig {
     public Jaxb2Marshaller smartMeteringAdhocMarshaller() {
         final Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 
-        marshaller.setContextPath(this.environment
-                .getRequiredProperty(PROPERTY_NAME_MARSHALLER_CONTEXT_PATH_SMART_METERING_ADHOC));
+        marshaller.setContextPath(this.marshallerContextPathAdhoc);
 
         return marshaller;
     }
@@ -268,8 +280,7 @@ public class WebServiceConfig {
     public Jaxb2Marshaller smartMeteringConfigurationMarshaller() {
         final Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 
-        marshaller.setContextPath(this.environment
-                .getRequiredProperty(PROPERTY_NAME_MARSHALLER_CONTEXT_PATH_SMART_METERING_CONFIGURATION));
+        marshaller.setContextPath(this.marshallerContextPathConfiguration);
 
         return marshaller;
     }

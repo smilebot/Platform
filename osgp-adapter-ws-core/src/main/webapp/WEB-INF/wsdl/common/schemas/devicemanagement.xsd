@@ -80,6 +80,7 @@
         <xsd:element name="Until" type="xsd:dateTime" minOccurs="0" />
         <xsd:element name="PageSize" type="xsd:int" minOccurs="0" />
         <xsd:element name="Page" type="xsd:int" minOccurs="0" />
+        <xsd:element name="EventTypes" type="tns:EventType" minOccurs="0" maxOccurs="unbounded" />
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
@@ -99,6 +100,7 @@
         <xsd:element name="PageSize" type="xsd:int" minOccurs="0" />
         <xsd:element name="Page" type="xsd:int" minOccurs="0" />
         <xsd:element name="DeviceFilter" type="tns:DeviceFilter" minOccurs="0" />
+        <xsd:element name="UsePages" type="xsd:boolean" minOccurs="0" />
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
@@ -108,6 +110,8 @@
       <xsd:sequence>
         <xsd:element name="Devices" type="tns:Device" maxOccurs="unbounded" />
         <xsd:element name="Page" type="common:Page" />
+        <xsd:element name="Message" type="xsd:string" />
+        <xsd:element name="Argument" type="xsd:string" />
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
@@ -245,6 +249,7 @@
       <xsd:enumeration value="PENDING" />
       <xsd:enumeration value="COMPLETE" />
       <xsd:enumeration value="FAILED" />
+      <xsd:enumeration value="RETRY" />
     </xsd:restriction>
   </xsd:simpleType>
 
@@ -272,22 +277,14 @@
       <xsd:element name="Activated" type="xsd:boolean" minOccurs="0" />
       <xsd:element name="HasSchedule" type="xsd:boolean" minOccurs="0" />
       <xsd:element name="PublicKeyPresent" type="xsd:boolean" minOccurs="0" />
-      <xsd:sequence>
-        <xsd:element name="Organisations" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
-      </xsd:sequence>
-      <xsd:sequence>
-        <xsd:element name="OutputSettings" type="tns:DeviceOutputSetting" minOccurs="0" maxOccurs="unbounded" />
-      </xsd:sequence>
-      <xsd:sequence>
-        <xsd:element name="Eans" type="tns:Ean" minOccurs="0" maxOccurs="unbounded" />
-      </xsd:sequence>
-      <xsd:sequence>
-        <xsd:element name="RelayStatuses" type="tns:RelayStatus" minOccurs="0" maxOccurs="unbounded" />
-      </xsd:sequence>
-      <xsd:sequence>
-        <xsd:element name="DeviceAuthorizations" type="tns:DeviceAuthorization" minOccurs="0" maxOccurs="unbounded" />
-      </xsd:sequence>
+      <xsd:element name="Organisations" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+      <xsd:element name="OutputSettings" type="tns:DeviceOutputSetting" minOccurs="0" maxOccurs="unbounded" />
+      <xsd:element name="Eans" type="tns:Ean" minOccurs="0" maxOccurs="unbounded" />
+      <xsd:element name="RelayStatuses" type="tns:RelayStatus" minOccurs="0" maxOccurs="unbounded" />
+      <xsd:element name="DeviceAuthorizations" type="tns:DeviceAuthorization" minOccurs="0" maxOccurs="unbounded" />
       <xsd:element name="InMaintenance" type="xsd:boolean" minOccurs="0" />
+      <xsd:element name="TechnicalInstallationDate" type="xsd:dateTime"  minOccurs="0" />
+      <xsd:element name="DeviceModel" type="tns:DeviceModel" minOccurs="0" />
     </xsd:sequence>
   </xsd:complexType>
 
@@ -316,13 +313,31 @@
       <xsd:element name="Street" type="xsd:string" minOccurs="0" />
       <xsd:element name="Number" type="xsd:string" minOccurs="0" />
       <xsd:element name="Municipality" type="xsd:string" minOccurs="0" />
+      <xsd:element name="DeviceType" type="xsd:string" minOccurs="0" />
+      <xsd:element name="Manufacturer" type="xsd:string" minOccurs="0" />
+      <xsd:element name="Model" type="xsd:string" minOccurs="0" />
       <xsd:element name="DeviceExternalManaged" type="tns:DeviceExternalManagedFilterType" minOccurs="0" />
       <xsd:element name="DeviceActivated" type="tns:DeviceActivatedFilterType" minOccurs="0" />
       <xsd:element name="DeviceInMaintenance" type="tns:DeviceInMaintetanceFilterType" minOccurs="0" />
       <xsd:element name="SortDir" type="xsd:string" minOccurs="0" />
       <xsd:element name="SortedBy" type="xsd:string" minOccurs="0" />
+      <xsd:element name="HasTechnicalInstallation" type="xsd:boolean" />
+      <xsd:element name="Owner" type="xsd:string" minOccurs="0" />
+      <xsd:element name="FirmwareModuleType" type="tns:FirmwareModuleFilterType" minOccurs="0" />
+      <xsd:element name="FirmwareModuleVersion" type="xsd:string" minOccurs="0" />
     </xsd:sequence>
   </xsd:complexType>
+
+  <xsd:simpleType name="FirmwareModuleFilterType">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="COMMUNICATION" />
+      <xsd:enumeration value="FUNCTIONAL" />
+      <xsd:enumeration value="SECURITY" />
+      <xsd:enumeration value="M_BUS" />
+      <xsd:enumeration value="MODULE_ACTIVE" />
+      <xsd:enumeration value="ACTIVE_FIRMWARE" />
+    </xsd:restriction>
+  </xsd:simpleType>
 
   <xsd:simpleType name="DeviceExternalManagedFilterType">
     <xsd:restriction base="xsd:string">
@@ -404,7 +419,11 @@
   <xsd:simpleType name="EventType">
     <xsd:restriction base="xsd:string">
       <xsd:enumeration value="DIAG_EVENTS_GENERAL" />
+      <xsd:enumeration value="DIAG_EVENTS_UNKNOWN_MESSAGE_TYPE" />
       <xsd:enumeration value="HARDWARE_FAILURE_RELAY" />
+      <xsd:enumeration value="HARDWARE_FAILURE_FLASH_WRITE_ERROR" />
+      <xsd:enumeration value="HARDWARE_FAILURE_FLASH_MEMORY_CORRUPT" />
+      <xsd:enumeration value="HARDWARE_FAILURE_RTC_NOT_SET" />
       <xsd:enumeration value="LIGHT_FAILURE_DALI_COMMUNICATION" />
       <xsd:enumeration value="LIGHT_FAILURE_BALLAST" />
       <xsd:enumeration value="LIGHT_EVENTS_LIGHT_ON" />
@@ -420,6 +439,8 @@
       <xsd:enumeration value="COMM_EVENTS_ALTERNATIVE_CHANNEL" />
       <xsd:enumeration value="COMM_EVENTS_RECOVERED_CHANNEL" />
       <xsd:enumeration value="SECURITY_EVENTS_OUT_OF_SEQUENCE" />
+      <xsd:enumeration value="SECURITY_EVENTS_OSLP_VERIFICATION_FAILED" />
+      <xsd:enumeration value="SECURITY_EVENTS_INVALID_CERTIFICATE" />
       <xsd:enumeration value="MONITOR_SHORT_DETECTED" />
       <xsd:enumeration value="MONITOR_SHORT_RESOLVED" />
       <xsd:enumeration value="MONITOR_DOOR_OPENED" />
@@ -432,6 +453,15 @@
       <xsd:enumeration value="MONITOR_EVENTS_LOCAL_MODE" />
       <xsd:enumeration value="MONITOR_EVENTS_REMOTE_MODE" />
       <xsd:enumeration value="FIRMWARE_EVENTS_CONFIGURATION_CHANGED" />
+      <xsd:enumeration value="FIRMWARE_EVENTS_DOWNLOAD_SUCCESS" />
+      <xsd:enumeration value="CA_FILE_EVENTS_ACTIVATING" />
+      <xsd:enumeration value="CA_FILE_FIRMWARE_EVENTS_DOWNLOAD_NOT_FOUND" />
+      <xsd:enumeration value="CA_FILE_EVENTS_DOWNLOAD_FAILED" />
+      <xsd:enumeration value="CA_FILE_EVENTS_DOWNLOAD_SUCCESS" />
+      <xsd:enumeration value="NTP_SERVER_NOT_REACH" />
+      <xsd:enumeration value="NTP_SYNC_ALARM_OFFSET" />
+      <xsd:enumeration value="NTP_SYNC_MAX_OFFSET" />
+      <xsd:enumeration value="AUTHENTICATION_FAIL" />
     </xsd:restriction>
   </xsd:simpleType>
 
@@ -482,6 +512,76 @@
       <xsd:element name="organisation" type="xsd:string" minOccurs="0" />
     </xsd:sequence>
   </xsd:complexType>
+
+   <xsd:complexType name="DeviceModel">
+      <xsd:sequence>
+         <xsd:element name="Manufacturer" type="tns:Manufacturer" minOccurs="0" />
+         <xsd:element name="ModelCode" minOccurs="0" maxOccurs="1">
+            <xsd:simpleType>
+               <xsd:restriction base="xsd:string">
+                  <xsd:maxLength value="15" />
+               </xsd:restriction>
+            </xsd:simpleType>
+         </xsd:element>
+         <xsd:element name="Description" minOccurs="0" maxOccurs="1">
+            <xsd:simpleType>
+               <xsd:restriction base="xsd:string">
+                  <xsd:maxLength value="255" />
+               </xsd:restriction>
+            </xsd:simpleType>
+         </xsd:element>
+      </xsd:sequence>
+   </xsd:complexType>
+
+   <xsd:complexType name="Firmware">
+      <xsd:sequence>
+         <xsd:element name="Id" type="xsd:int" />
+         <xsd:element name="Filename" type="xsd:string" minOccurs="0" />
+         <xsd:element name="CreationTime" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
+         <xsd:element name="Manufacturer" minOccurs="0">
+            <xsd:simpleType>
+               <xsd:restriction base="xsd:string">
+                  <xsd:maxLength value="4" />
+               </xsd:restriction>
+            </xsd:simpleType>
+         </xsd:element>
+         <xsd:element name="DeviceModel" type="tns:DeviceModel" minOccurs="0" />
+         <xsd:element name="Description" minOccurs="0" maxOccurs="1">
+            <xsd:simpleType>
+               <xsd:restriction base="xsd:string">
+                  <xsd:maxLength value="255" />
+               </xsd:restriction>
+            </xsd:simpleType>
+         </xsd:element>
+         <xsd:element name="PushToNewDevices" type="xsd:boolean" />
+         <xsd:element name="ModuleVersionComm" type="xsd:string" />
+         <xsd:element name="ModuleVersionFunc" type="xsd:string" />
+         <xsd:element name="ModuleVersionMa" type="xsd:string" />
+         <xsd:element name="ModuleVersionMbus" type="xsd:string" />
+         <xsd:element name="ModuleVersionSec" type="xsd:string" />
+         <xsd:element name="File" minOccurs="0" type="xsd:base64Binary"/>
+      </xsd:sequence>
+   </xsd:complexType>
+
+   <xsd:complexType name="Manufacturer">
+      <xsd:sequence>
+         <xsd:element name="Name" minOccurs="1" maxOccurs="1">
+            <xsd:simpleType>
+               <xsd:restriction base="xsd:string">
+                  <xsd:maxLength value="50" />
+               </xsd:restriction>
+            </xsd:simpleType>
+         </xsd:element>
+         <xsd:element name="ManufacturerId" minOccurs="1" maxOccurs="1">
+            <xsd:simpleType>
+               <xsd:restriction base="xsd:string">
+                  <xsd:maxLength value="4" />
+               </xsd:restriction>
+            </xsd:simpleType>
+         </xsd:element>
+         <xsd:element name="UsePrefix" type="xsd:boolean" minOccurs="1" maxOccurs="1" />
+      </xsd:sequence>
+   </xsd:complexType>
 
   <xsd:complexType name="Certification">
     <xsd:sequence>

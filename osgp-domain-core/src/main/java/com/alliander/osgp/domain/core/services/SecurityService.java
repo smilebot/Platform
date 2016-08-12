@@ -45,7 +45,12 @@ public class SecurityService {
                 PlatformFunction.UPDATE_KEY, PlatformFunction.REVOKE_KEY, PlatformFunction.FIND_SCHEDULED_TASKS,
                 PlatformFunction.CREATE_MANUFACTURER, PlatformFunction.GET_MANUFACTURERS,
                 PlatformFunction.DEACTIVATE_DEVICE, PlatformFunction.CHANGE_MANUFACTURER,
-                PlatformFunction.REMOVE_MANUFACTURER });
+                PlatformFunction.REMOVE_MANUFACTURER, PlatformFunction.GET_PROTOCOL_INFOS,
+                PlatformFunction.UPDATE_DEVICE_PROTOCOL, PlatformFunction.GET_DEVICE_MODELS,
+                PlatformFunction.CREATE_DEVICE_MODEL, PlatformFunction.REMOVE_DEVICE_MODEL,
+                PlatformFunction.CHANGE_DEVICE_MODEL, PlatformFunction.GET_FIRMWARE,
+                PlatformFunction.CREATE_FIRMWARE, PlatformFunction.REMOVE_FIRMWARE,
+                PlatformFunction.CHANGE_FIRMWARE});
 
         platformMapping.put(PlatformFunctionGroup.USER, new PlatformFunction[] { PlatformFunction.GET_ORGANISATIONS,
                 PlatformFunction.FIND_DEVICES });

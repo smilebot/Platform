@@ -27,14 +27,14 @@ import com.alliander.osgp.domain.core.valueobjects.smartmetering.PeriodicMeterRe
 import com.alliander.osgp.domain.core.valueobjects.smartmetering.PeriodicMeterReadsQuery;
 import com.alliander.osgp.domain.core.valueobjects.smartmetering.ReadAlarmRegisterRequest;
 import com.alliander.osgp.dto.valueobjects.smartmetering.ActualMeterReadsQueryDto;
-import com.alliander.osgp.dto.valueobjects.smartmetering.AlarmRegisterDto;
+import com.alliander.osgp.dto.valueobjects.smartmetering.AlarmRegisterResponseDto;
 import com.alliander.osgp.dto.valueobjects.smartmetering.ChannelDto;
-import com.alliander.osgp.dto.valueobjects.smartmetering.MeterReadsDto;
-import com.alliander.osgp.dto.valueobjects.smartmetering.MeterReadsGasDto;
+import com.alliander.osgp.dto.valueobjects.smartmetering.MeterReadsResponseDto;
+import com.alliander.osgp.dto.valueobjects.smartmetering.MeterReadsGasResponseDto;
 import com.alliander.osgp.dto.valueobjects.smartmetering.PeriodTypeDto;
-import com.alliander.osgp.dto.valueobjects.smartmetering.PeriodicMeterReadsContainerDto;
-import com.alliander.osgp.dto.valueobjects.smartmetering.PeriodicMeterReadsContainerGasDto;
-import com.alliander.osgp.dto.valueobjects.smartmetering.PeriodicMeterReadsQueryDto;
+import com.alliander.osgp.dto.valueobjects.smartmetering.PeriodicMeterReadsResponseDto;
+import com.alliander.osgp.dto.valueobjects.smartmetering.PeriodicMeterReadGasResponseDto;
+import com.alliander.osgp.dto.valueobjects.smartmetering.PeriodicMeterReadsRequestDto;
 import com.alliander.osgp.dto.valueobjects.smartmetering.ReadAlarmRegisterRequestDto;
 import com.alliander.osgp.shared.exceptionhandling.ComponentType;
 import com.alliander.osgp.shared.exceptionhandling.FunctionalException;
@@ -76,8 +76,6 @@ public class MonitoringService {
         LOGGER.info("requestPeriodicMeterReads for organisationIdentification: {} for deviceIdentification: {}",
                 deviceMessageMetadata.getOrganisationIdentification(), deviceMessageMetadata.getDeviceIdentification());
 
-        // TODO: bypassing authorization, this should be fixed.
-
         final SmartMeter smartMeter = this.domainHelperService.findSmartMeter(deviceMessageMetadata
                 .getDeviceIdentification());
 
@@ -94,7 +92,7 @@ public class MonitoringService {
                         ComponentType.DOMAIN_SMART_METERING, new AssertionError(
                                 "Meter for gas reads should have a channel configured."));
             }
-            final PeriodicMeterReadsQueryDto periodicMeterReadsQuery = new PeriodicMeterReadsQueryDto(
+            final PeriodicMeterReadsRequestDto periodicMeterReadsQuery = new PeriodicMeterReadsRequestDto(
                     PeriodTypeDto.valueOf(periodicMeterReadsValueQuery.getPeriodType().name()),
                     periodicMeterReadsValueQuery.getBeginDate(), periodicMeterReadsValueQuery.getEndDate(),
                     ChannelDto.fromNumber(smartMeter.getChannel()));
@@ -120,14 +118,14 @@ public class MonitoringService {
                     new RequestMessage(deviceMessageMetadata.getCorrelationUid(), deviceMessageMetadata
                             .getOrganisationIdentification(), deviceMessageMetadata.getDeviceIdentification(),
                             smartMeter.getIpAddress(), this.monitoringMapper.map(periodicMeterReadsValueQuery,
-                                    PeriodicMeterReadsQueryDto.class)), deviceMessageMetadata.getMessageType(),
-                    deviceMessageMetadata.getMessagePriority(), deviceMessageMetadata.getScheduleTime());
+                                    PeriodicMeterReadsRequestDto.class)), deviceMessageMetadata.getMessageType(),
+                                    deviceMessageMetadata.getMessagePriority(), deviceMessageMetadata.getScheduleTime());
         }
     }
 
     public void handlePeriodicMeterReadsresponse(final DeviceMessageMetadata deviceMessageMetadata,
             final ResponseMessageResultType deviceResult, final OsgpException exception,
-            final PeriodicMeterReadsContainerDto periodMeterReadsValueDTO) {
+            final PeriodicMeterReadsResponseDto periodMeterReadsValueDTO) {
 
         LOGGER.info("handlePeriodicMeterReadsresponse for MessageType: {}", deviceMessageMetadata.getMessageType());
 
@@ -142,12 +140,12 @@ public class MonitoringService {
                         .getOrganisationIdentification(), deviceMessageMetadata.getDeviceIdentification(), result,
                         exception, this.monitoringMapper.map(periodMeterReadsValueDTO,
                                 PeriodicMeterReadsContainer.class), deviceMessageMetadata.getMessagePriority()),
-                deviceMessageMetadata.getMessageType());
+                                deviceMessageMetadata.getMessageType());
     }
 
     public void handlePeriodicMeterReadsresponse(final DeviceMessageMetadata deviceMessageMetadata,
             final ResponseMessageResultType deviceResult, final OsgpException exception,
-            final PeriodicMeterReadsContainerGasDto periodMeterReadsValueDTO) {
+            final PeriodicMeterReadGasResponseDto periodMeterReadsValueDTO) {
 
         LOGGER.info("handlePeriodicMeterReadsresponse for MessageType: {}", deviceMessageMetadata.getMessageType());
 
@@ -162,12 +160,12 @@ public class MonitoringService {
                         .getOrganisationIdentification(), deviceMessageMetadata.getDeviceIdentification(), result,
                         exception, this.monitoringMapper.map(periodMeterReadsValueDTO,
                                 PeriodicMeterReadsContainerGas.class), deviceMessageMetadata.getMessagePriority()),
-                deviceMessageMetadata.getMessageType());
+                                deviceMessageMetadata.getMessageType());
     }
 
     public void requestActualMeterReads(final DeviceMessageMetadata deviceMessageMetadata,
             final com.alliander.osgp.domain.core.valueobjects.smartmetering.ActualMeterReadsQuery actualMeterReadsQuery)
-            throws FunctionalException {
+                    throws FunctionalException {
 
         LOGGER.info("requestActualMeterReads for organisationIdentification: {} for deviceIdentification: {}",
                 deviceMessageMetadata.getOrganisationIdentification(), deviceMessageMetadata.getDeviceIdentification());
@@ -204,8 +202,8 @@ public class MonitoringService {
                     new RequestMessage(deviceMessageMetadata.getCorrelationUid(), deviceMessageMetadata
                             .getOrganisationIdentification(), gatewayDevice.getDeviceIdentification(), gatewayDevice
                             .getIpAddress(), new ActualMeterReadsQueryDto(
-                            ChannelDto.fromNumber(smartMeter.getChannel()))), deviceMessageMetadata.getMessageType(),
-                    deviceMessageMetadata.getMessagePriority(), deviceMessageMetadata.getScheduleTime());
+                                    ChannelDto.fromNumber(smartMeter.getChannel()))), deviceMessageMetadata.getMessageType(),
+                                    deviceMessageMetadata.getMessagePriority(), deviceMessageMetadata.getScheduleTime());
         } else {
             this.osgpCoreRequestMessageSender.send(
                     new RequestMessage(deviceMessageMetadata.getCorrelationUid(), deviceMessageMetadata
@@ -218,7 +216,7 @@ public class MonitoringService {
 
     public void handleActualMeterReadsResponse(final DeviceMessageMetadata deviceMessageMetadata,
             final ResponseMessageResultType deviceResult, final OsgpException exception,
-            final MeterReadsDto actualMeterReadsDto) {
+            final MeterReadsResponseDto actualMeterReadsDto) {
 
         LOGGER.info("handleActualMeterReadsResponse for MessageType: {}", deviceMessageMetadata.getMessageType());
 
@@ -236,7 +234,7 @@ public class MonitoringService {
 
     public void handleActualMeterReadsResponse(final DeviceMessageMetadata deviceMessageMetadata,
             final ResponseMessageResultType deviceResult, final OsgpException exception,
-            final MeterReadsGasDto actualMeterReadsGas) {
+            final MeterReadsGasResponseDto actualMeterReadsGas) {
 
         LOGGER.info("handleActualMeterReadsResponse for MessageType: {}", deviceMessageMetadata.getMessageType());
 
@@ -272,7 +270,7 @@ public class MonitoringService {
 
     public void handleReadAlarmRegisterResponse(final DeviceMessageMetadata deviceMessageMetadata,
             final ResponseMessageResultType deviceResult, final OsgpException exception,
-            final AlarmRegisterDto alarmRegisterDto) {
+            final AlarmRegisterResponseDto alarmRegisterDto) {
 
         LOGGER.info("handleReadAlarmRegisterResponse for MessageType: {}", deviceMessageMetadata.getMessageType());
 

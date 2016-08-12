@@ -46,10 +46,11 @@ public class SetConfigurationObjectRequestMappingTest {
 
         // build test data
         final String deviceIdentification = "nr1";
-        final SetConfigurationObjectRequestData setConfigurationObjectRequestData = null;
+        final SetConfigurationObjectRequestDataDto setConfigurationObjectRequestData = null;
 
         // actual mapping
-        final SetConfigurationObjectRequest setConfigurationObjectRequest = new SetConfigurationObjectRequest(
+        final SetConfigurationObjectRequestDto setConfigurationObjectRequest = 
+                new SetConfigurationObjectRequestDto(
                 deviceIdentification, setConfigurationObjectRequestData);
         final SetConfigurationObjectRequestDto setConfigurationObjectRequestDto = this.configurationMapper.map(
                 setConfigurationObjectRequest, SetConfigurationObjectRequestDto.class);
@@ -67,12 +68,13 @@ public class SetConfigurationObjectRequestMappingTest {
         // build test data
         final String deviceIdentification = "nr1";
 
-        final ConfigurationObject configurationObject = null;
-        final SetConfigurationObjectRequestData setConfigurationObjectRequestData = new SetConfigurationObjectRequestData(
+        final ConfigurationObjectDto configurationObject = null;
+        final SetConfigurationObjectRequestDataDto setConfigurationObjectRequestData = new SetConfigurationObjectRequestDataDto(
                 configurationObject);
 
         // actual mapping
-        final SetConfigurationObjectRequest setConfigurationObjectRequest = new SetConfigurationObjectRequest(
+        final SetConfigurationObjectRequestDto setConfigurationObjectRequest = 
+                new SetConfigurationObjectRequestDto(
                 deviceIdentification, setConfigurationObjectRequestData);
         final SetConfigurationObjectRequestDto setConfigurationObjectRequestDto = this.configurationMapper.map(
                 setConfigurationObjectRequest, SetConfigurationObjectRequestDto.class);
@@ -98,7 +100,8 @@ public class SetConfigurationObjectRequestMappingTest {
                 configurationObject);
 
         // actual mapping
-        final SetConfigurationObjectRequest setConfigurationObjectRequest = new SetConfigurationObjectRequest(
+        final SetConfigurationObjectRequest setConfigurationObjectRequest = 
+                new SetConfigurationObjectRequest(
                 deviceIdentification, setConfigurationObjectRequestData);
         final SetConfigurationObjectRequestDto setConfigurationObjectRequestDto = this.configurationMapper.map(
                 setConfigurationObjectRequest, SetConfigurationObjectRequestDto.class);
@@ -134,7 +137,8 @@ public class SetConfigurationObjectRequestMappingTest {
                 configurationObject);
 
         // actual mapping
-        final SetConfigurationObjectRequest setConfigurationObjectRequest = new SetConfigurationObjectRequest(
+        final SetConfigurationObjectRequest setConfigurationObjectRequest = 
+                new SetConfigurationObjectRequest(
                 deviceIdentification, setConfigurationObjectRequestData);
         final SetConfigurationObjectRequestDto setConfigurationObjectRequestDto = this.configurationMapper.map(
                 setConfigurationObjectRequest, SetConfigurationObjectRequestDto.class);
@@ -165,7 +169,7 @@ public class SetConfigurationObjectRequestMappingTest {
 
         // check the GprsOperationModeTypeDto value
         final GprsOperationModeTypeDto gprsOperationModeTypeDto = configurationObjectDto.getGprsOperationMode();
-        assertEquals(gprsOperationModeType.value(), gprsOperationModeTypeDto.value());
+        assertEquals(gprsOperationModeType.name(), gprsOperationModeTypeDto.name());
 
         // check if ConfigurationFlagsDto object is present, and if its List is
         // of an equal size.
@@ -177,7 +181,7 @@ public class SetConfigurationObjectRequestMappingTest {
         // check ConfigurationObjectFlagTypeDto value.
         final ConfigurationFlagDto configurationFlagDto = configurationFlagsDto.getConfigurationFlag().get(0);
         final ConfigurationFlagTypeDto configurationFlagTypeDto = configurationFlagDto.getConfigurationFlagType();
-        assertEquals(configurationFlagType.value(), configurationFlagTypeDto.value());
+        assertEquals(configurationFlagType.name(), configurationFlagTypeDto.name());
     }
 
 }

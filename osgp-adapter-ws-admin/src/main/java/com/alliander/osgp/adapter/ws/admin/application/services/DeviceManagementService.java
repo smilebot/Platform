@@ -7,8 +7,6 @@
  */
 package com.alliander.osgp.adapter.ws.admin.application.services;
 
-import static org.springframework.data.jpa.domain.Specifications.where;
-
 import java.util.List;
 
 import javax.naming.OperationNotSupportedException;
@@ -17,14 +15,13 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specifications;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,7 +53,6 @@ import com.alliander.osgp.domain.core.services.DeviceDomainService;
 import com.alliander.osgp.domain.core.services.OrganisationDomainService;
 import com.alliander.osgp.domain.core.services.SecurityService;
 import com.alliander.osgp.domain.core.specifications.DeviceSpecifications;
-import com.alliander.osgp.domain.core.specifications.EventSpecifications;
 import com.alliander.osgp.domain.core.validation.Identification;
 import com.alliander.osgp.domain.core.validation.PublicKey;
 import com.alliander.osgp.domain.core.valueobjects.DeviceFunction;
@@ -95,9 +91,6 @@ public class DeviceManagementService {
     private OrganisationRepository organisationRepository;
 
     @Autowired
-    private EventSpecifications eventSpecifications;
-
-    @Autowired
     private DeviceRepository deviceRepository;
 
     @Autowired
@@ -120,12 +113,6 @@ public class DeviceManagementService {
 
     @Autowired
     private AdminResponseMessageFinder adminResponseMessageFinder;
-
-    @Autowired
-    private String defaultProtocol;
-
-    @Autowired
-    private String defaultProtocolVersion;
 
     @Autowired
     private ProtocolInfoRepository protocolRepository;
@@ -308,6 +295,33 @@ public class DeviceManagementService {
 
     }
 
+    public void removeDeviceAuthorization(@Identification final String ownerOrganisationIdentification,
+            @Identification final String organisationIdentification, @Identification final String deviceIdentification,
+            @NotNull final DeviceFunctionGroup group) throws FunctionalException {
+
+        if (group == DeviceFunctionGroup.OWNER) {
+            throw new FunctionalException(FunctionalExceptionType.METHOD_NOT_ALLOWED_FOR_OWNER, ComponentType.WS_ADMIN,
+                    new OperationNotSupportedException("Owner not allowed to set via this method."));
+        }
+
+        // Check input data and authorization
+        final Organisation organisation = this.findOrganisation(organisationIdentification);
+
+        final Organisation ownerOrganisation = this.findOrganisation(ownerOrganisationIdentification);
+
+        final Device device = this.findDevice(deviceIdentification);
+
+        this.isAllowed(ownerOrganisation, device, DeviceFunction.SET_DEVICE_AUTHORIZATION);
+
+        // All checks pass, remove authorization
+        device.removeAuthorization(organisation, group);
+        this.deviceRepository.save(device);
+        this.authorizationRepository.deleteByDeviceAndFunctionGroup(device, group);
+
+        LOGGER.info("Organisation {} now no longer has authorization for function group {} on device {}",
+                organisationIdentification, deviceIdentification, group);
+    }
+
     /**
      * Get all devices which have no owner.
      *
@@ -361,52 +375,6 @@ public class DeviceManagementService {
         }
 
         return this.logItemRepository.findAll(request);
-    }
-
-    public Page<Event> findEvents(@Identification final String organisationIdentification,
-            final String deviceIdentification, final Integer pageSize, final Integer pageNumber, final DateTime from,
-            final DateTime until) throws FunctionalException {
-
-        LOGGER.debug("findEvents called for organisation {} and device {}", organisationIdentification,
-                deviceIdentification);
-
-        final Organisation organisation = this.findOrganisation(organisationIdentification);
-
-        this.pagingSettings.updatePagingSettings(pageSize, pageNumber);
-
-        final PageRequest request = new PageRequest(this.pagingSettings.getPageNumber(),
-                this.pagingSettings.getPageSize(), Sort.Direction.DESC, "creationTime");
-
-        Specifications<Event> specifications;
-
-        try {
-            if (deviceIdentification != null && !deviceIdentification.isEmpty()) {
-                final Device device = this.findDevice(deviceIdentification);
-                this.isAllowed(organisation, device, DeviceFunction.GET_EVENT_NOTIFICATIONS);
-
-                specifications = where(this.eventSpecifications.isFromDevice(device));
-            } else {
-                specifications = where(this.eventSpecifications.isAuthorized(organisation));
-            }
-
-            if (from != null) {
-                specifications = specifications.and(this.eventSpecifications.isCreatedAfter(from.toDate()));
-            }
-
-            if (until != null) {
-                specifications = specifications.and(this.eventSpecifications.isCreatedBefore(until.toDate()));
-            }
-        } catch (final ArgumentNullOrEmptyException e) {
-            LOGGER.error("an argument is null", e);
-            throw new FunctionalException(FunctionalExceptionType.ARGUMENT_NULL, ComponentType.WS_ADMIN, e);
-        }
-
-        LOGGER.debug("request offset     : {}", request.getOffset());
-        LOGGER.debug("        pageNumber : {}", request.getPageNumber());
-        LOGGER.debug("        pageSize   : {}", request.getPageSize());
-        LOGGER.debug("        sort       : {}", request.getSort());
-
-        return this.eventRepository.findAll(specifications, request);
     }
 
     // === REMOVE DEVICE ===
@@ -489,7 +457,7 @@ public class DeviceManagementService {
     // === UPDATE KEY ===
 
     public void updateKey(final String organisationIdentification, @Identification final String deviceIdentification,
-            @PublicKey final String publicKey) throws FunctionalException {
+            @PublicKey final String publicKey, final Long protocolInfoId) throws FunctionalException {
 
         LOGGER.debug("Updating key for device [{}] on behalf of organisation [{}]", deviceIdentification,
                 organisationIdentification);
@@ -508,8 +476,7 @@ public class DeviceManagementService {
 
             final DeviceAuthorization authorization = ssld.addAuthorization(organisation, DeviceFunctionGroup.OWNER);
 
-            final ProtocolInfo protocolInfo = this.protocolRepository.findByProtocolAndProtocolVersion(
-                    this.defaultProtocol, this.defaultProtocolVersion);
+            final ProtocolInfo protocolInfo = this.protocolRepository.findOne(protocolInfoId);
             ssld.updateProtocol(protocolInfo);
 
             this.authorizationRepository.save(authorization);
@@ -577,6 +544,42 @@ public class DeviceManagementService {
         return this.adminResponseMessageFinder.findMessage(correlationUid);
     }
 
+    public List<ProtocolInfo> getProtocolInfos(final String organisationIdentification) throws FunctionalException {
+
+        LOGGER.debug("Retrieving all protocol infos on behalf of organisation: {}", organisationIdentification);
+
+        final Organisation organisation = this.findOrganisation(organisationIdentification);
+        this.isAllowed(organisation, PlatformFunction.GET_PROTOCOL_INFOS);
+
+        return this.protocolRepository.findAll(new Sort(Direction.ASC, "protocol", "protocolVersion"));
+    }
+
+    public void updateDeviceProtocol(final String organisationIdentification,
+            @Identification final String deviceIdentification, final String protocol, final String protocolVersion)
+                    throws FunctionalException {
+
+        LOGGER.debug("Updating protocol for device [{}] on behalf of organisation [{}] to protocol: {}, version: {}",
+                deviceIdentification, organisationIdentification, protocol, protocolVersion);
+
+        final Organisation organisation = this.findOrganisation(organisationIdentification);
+        this.isAllowed(organisation, PlatformFunction.UPDATE_DEVICE_PROTOCOL);
+
+        final Device device = this.findDevice(deviceIdentification);
+        final ProtocolInfo protocolInfo = this.findProtocolInfo(protocol, protocolVersion);
+
+        if (protocolInfo.equals(device.getProtocolInfo())) {
+            LOGGER.info("Not updating protocol: {}, version: {} on device {} since it is already configured", protocol,
+                    protocolVersion, deviceIdentification);
+            return;
+        }
+
+        device.updateProtocol(protocolInfo);
+        this.deviceRepository.save(device);
+
+        LOGGER.info("Organisation {} configured protocol: {}, version: {} on device {}", organisationIdentification,
+                protocol, protocolVersion, deviceIdentification);
+    }
+
     public String enqueueDeactivateDeviceRequest(final String organisationIdentification,
             final String deviceIdentification) {
 
@@ -605,6 +608,10 @@ public class DeviceManagementService {
         final Organisation organisation = this.findOrganisation(organisationIdentification);
         this.isAllowed(organisation, PlatformFunction.DEACTIVATE_DEVICE);
 
+        if (this.deviceRepository.findByDeviceIdentification(deviceIdentification) == null) {
+            throw new FunctionalException(FunctionalExceptionType.UNKNOWN_DEVICE, ComponentType.WS_ADMIN);
+        }
+
         this.enqueueDeactivateDeviceRequest(organisationIdentification, deviceIdentification);
     }
 
@@ -616,6 +623,17 @@ public class DeviceManagementService {
             throw new FunctionalException(FunctionalExceptionType.UNKNOWN_DEVICE, ComponentType.WS_ADMIN, e);
         }
         return device;
+    }
+
+    private ProtocolInfo findProtocolInfo(final String protocol, final String protocolVersion)
+            throws FunctionalException {
+        final ProtocolInfo protocolInfo = this.protocolRepository.findByProtocolAndProtocolVersion(protocol,
+                protocolVersion);
+        if (protocolInfo == null) {
+            throw new FunctionalException(FunctionalExceptionType.UNKNOWN_PROTOCOL_NAME_OR_VERSION,
+                    ComponentType.WS_ADMIN);
+        }
+        return protocolInfo;
     }
 
     private Organisation findOrganisation(final String organisationIdentification) throws FunctionalException {

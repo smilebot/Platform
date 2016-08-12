@@ -11,6 +11,7 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -23,8 +24,6 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
@@ -192,19 +191,15 @@ public class Device implements Serializable {
     @Transient
     protected final List<String> organisations = new ArrayList<String>();
 
-    /**
-     * Firmware information indicates which firmware this device is using.
-     */
     @ManyToOne()
-    @JoinColumn(name = "firmware")
-    protected Firmware firmware;
+    @JoinColumn()
+    private DeviceModel deviceModel;
 
     /**
-     * Firmware history information
+     * Installation time of this entity.
      */
-    @ManyToMany()
-    @JoinTable(name = "firmware_history", joinColumns = { @JoinColumn(name = "device") }, inverseJoinColumns = { @JoinColumn(name = "firmware") })
-    protected List<Firmware> firmwareHistory;
+    @Column()
+    protected Date technicalInstallationDate;
 
     public Device() {
         // Default constructor
@@ -232,6 +227,15 @@ public class Device implements Serializable {
         final DeviceAuthorization authorization = new DeviceAuthorization(this, organisation, functionGroup);
         this.authorizations.add(authorization);
         return authorization;
+    }
+
+    public void removeAuthorization(final Organisation organisation, final DeviceFunctionGroup functionGroup) {
+        for (final Iterator<DeviceAuthorization> iter = this.authorizations.listIterator(); iter.hasNext();) {
+            final DeviceAuthorization da = iter.next();
+            if (da.getFunctionGroup().equals(functionGroup) && da.getOrganisation().equals(organisation)) {
+                iter.remove();
+            }
+        }
     }
 
     public void addOrganisation(final String organisationIdentification) {
@@ -435,19 +439,20 @@ public class Device implements Serializable {
         this.gatewayDevice = gatewayDevice;
     }
 
-    public Firmware getFirmware() {
-        return this.firmware;
+    public Date getTechnicalInstallationDate() {
+        return this.technicalInstallationDate;
     }
 
-    public void setFirmware(final Firmware firmware) {
-        this.firmware = firmware;
+    public void setTechnicalInstallationDate(final Date technicalInstallationDate) {
+        this.technicalInstallationDate = technicalInstallationDate;
     }
 
-    public List<Firmware> getFirmwareHistory() {
-        return this.firmwareHistory;
+    public DeviceModel getDeviceModel() {
+        return this.deviceModel;
     }
 
-    public void addFirmwareHistory(final Firmware firmware) {
-        this.firmwareHistory.add(firmware);
+    public void setDeviceModel(DeviceModel deviceModel) {
+        this.deviceModel = deviceModel;
     }
+
 }
