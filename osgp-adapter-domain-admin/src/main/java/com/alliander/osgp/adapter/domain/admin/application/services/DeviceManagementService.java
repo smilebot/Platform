@@ -164,16 +164,28 @@ public class DeviceManagementService extends AbstractService {
                 deviceIdentification, result, osgpException, null));
     }
 
+    public void activateDevice(final String organisationIdentification,
+            @Identification final String deviceIdentification, final String correlationUid, final String messageType) {
+        LOGGER.info("MessageType: {}. ActivateDevice for organisationIdentification: {} for deviceIdentification: {}",
+                messageType, organisationIdentification, deviceIdentification);
+
+        this.setDeviceIsActive(organisationIdentification, deviceIdentification, correlationUid, true);
+    }
+
     public void deactivateDevice(final String organisationIdentification,
             @Identification final String deviceIdentification, final String correlationUid, final String messageType) {
-        LOGGER.info("deactivateDevice for organisationIdentification: {} for deviceIdentification: {}",
-                organisationIdentification, deviceIdentification);
+        LOGGER.info(
+                "MessageType: {}. DeactivateDevice for organisationIdentification: {} for deviceIdentification: {}",
+                messageType, organisationIdentification, deviceIdentification);
 
-        // TODO: bypassing authorization, this should be fixed.
+        this.setDeviceIsActive(organisationIdentification, deviceIdentification, correlationUid, false);
+    }
 
+    private void setDeviceIsActive(final String organisationIdentification, final String deviceIdentification,
+            final String correlationUid, final boolean active) {
         final Device device = this.deviceRepository.findByDeviceIdentification(deviceIdentification);
 
-        device.setActivated(false);
+        device.setActive(active);
 
         this.deviceRepository.save(device);
 

@@ -20,7 +20,7 @@
   <parent>
     <groupId>com.alliander.osgp</groupId>
     <artifactId>parent-platform</artifactId>
-    <version>3.9.0</version>
+    <version>3.10.0</version>
     <relativePath>../parent-platform/pom.xml</relativePath>
   </parent>
 
