@@ -13,7 +13,7 @@
 
     <groupId>com.alliander.osgp</groupId>
     <artifactId>platform</artifactId>
-    <version>3.10.0</version>
+    <version>4.1.0</version>
     <packaging>pom</packaging>
     <!-- Description, Organization, Licenses, URL and Distribution Management elements are needed for the maven-jxr-plugin to generate a maven site -->
     <description>Main Components of OSGP and Protocol Adapters.</description>
@@ -85,11 +85,13 @@
         <!-- Domain -->
         <module>osgp-domain-core</module>
         <module>osgp-domain-logging</module>
+        <module>osgp-domain-microgrids</module>
 
         <module>osgp-adapter-domain-shared</module>
 
         <module>osgp-adapter-domain-admin</module>
         <module>osgp-adapter-domain-core</module>
+        <module>osgp-adapter-domain-microgrids</module>
         <module>osgp-adapter-domain-publiclighting</module>
         <module>osgp-adapter-domain-tariffswitching</module>
         <module>osgp-adapter-domain-smartmetering</module>
@@ -99,6 +101,7 @@
         <module>osgp-adapter-ws-shared-db</module>
         <module>osgp-adapter-ws-core</module>
         <module>osgp-adapter-ws-admin</module>
+        <module>osgp-adapter-ws-microgrids</module>
         <module>osgp-adapter-ws-publiclighting</module>
         <module>osgp-adapter-ws-tariffswitching</module>
         <module>osgp-adapter-ws-smartmetering</module>

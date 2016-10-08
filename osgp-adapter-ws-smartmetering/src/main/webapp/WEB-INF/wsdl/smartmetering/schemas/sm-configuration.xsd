@@ -72,11 +72,19 @@
 
   <xsd:complexType name="FirmwareVersion">
     <xsd:sequence>
-      <xsd:element name="version" type="xsd:string" />
-      <xsd:element name="type" type="xsd:string" />
+      <xsd:element name="Version" type="xsd:string" />
+      <xsd:element name="FirmwareModuleType" type="tns:FirmwareModuleType" />
     </xsd:sequence>
   </xsd:complexType>
 
+  <!-- Firmware Module Types -->
+  <xsd:simpleType name="FirmwareModuleType">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="ACTIVE_FIRMWARE" />
+      <xsd:enumeration value="MODULE_ACTIVE_FIRMWARE" />
+      <xsd:enumeration value="COMMUNICATION_MODULE_ACTIVE_FIRMWARE" />
+    </xsd:restriction>
+  </xsd:simpleType>
 
 <!-- For the support of single GetFirmwareVersion support -->
    <xsd:element name="GetFirmwareVersionRequest">
