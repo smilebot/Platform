@@ -51,34 +51,7 @@
         <wsdl:part element="dman:SetEventNotificationsResponse" name="SetEventNotificationsResponse">
         </wsdl:part>
     </wsdl:message>
-
-    <wsdl:message name="SetDeviceAuthorizationsHeader">
-        <wsdl:part element="common:OrganisationIdentification" name="OrganisationIdentification" />
-        <wsdl:part element="common:UserName" name="UserName" />
-        <wsdl:part element="common:ApplicationName" name="ApplicationName" />
-    </wsdl:message>
-    <wsdl:message name="SetDeviceAuthorizationsRequest">
-        <wsdl:part element="dman:SetDeviceAuthorizationsRequest" name="SetDeviceAuthorizationsRequest">
-        </wsdl:part>
-    </wsdl:message>
-    <wsdl:message name="SetDeviceAuthorizationsAsyncResponse">
-        <wsdl:part element="dman:SetDeviceAuthorizationsAsyncResponse" name="SetDeviceAuthorizationsAsyncResponse">
-        </wsdl:part>
-    </wsdl:message> 
-    <wsdl:message name="SetDeviceAuthorizationsAsyncHeader">
-        <wsdl:part element="common:OrganisationIdentification" name="OrganisationIdentification" />
-        <wsdl:part element="common:UserName" name="UserName" />
-        <wsdl:part element="common:ApplicationName" name="ApplicationName" />   
-    </wsdl:message>
-    <wsdl:message name="SetDeviceAuthorizationsAsyncRequest">
-        <wsdl:part element="dman:SetDeviceAuthorizationsAsyncRequest" name="SetDeviceAuthorizationsAsyncRequest">
-        </wsdl:part>
-    </wsdl:message> 
-    <wsdl:message name="SetDeviceAuthorizationsResponse">
-        <wsdl:part element="dman:SetDeviceAuthorizationsResponse" name="SetDeviceAuthorizationsResponse">
-        </wsdl:part>
-    </wsdl:message>
-
+                    
     <wsdl:message name="FindEventsHeader">
         <wsdl:part element="common:OrganisationIdentification" name="OrganisationIdentification" />
         <wsdl:part element="common:UserName" name="UserName" />
@@ -223,7 +196,6 @@
             <wsdl:output message="tns:FindEventsResponse" name="FindEventsResponse">
             </wsdl:output>
         </wsdl:operation>
-        
         <wsdl:operation name="SetEventNotifications">
             <wsdl:input message="tns:SetEventNotificationsRequest" name="SetEventNotificationsRequest">
             </wsdl:input>
@@ -235,19 +207,6 @@
             <wsdl:input message="tns:SetEventNotificationsAsyncRequest" name="SetEventNotificationsAsyncRequest">
             </wsdl:input>
             <wsdl:output message="tns:SetEventNotificationsResponse" name="SetEventNotificationsResponse">
-            </wsdl:output>
-        </wsdl:operation>
-
-        <wsdl:operation name="SetDeviceAuthorizations">
-            <wsdl:input message="tns:SetDeviceAuthorizationsRequest" name="SetDeviceAuthorizationsRequest">
-            </wsdl:input>
-            <wsdl:output message="tns:SetDeviceAuthorizationsAsyncResponse" name="SetDeviceAuthorizationsAsyncResponse">
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="GetSetDeviceAuthorizationsResponse">
-            <wsdl:input message="tns:SetDeviceAuthorizationsAsyncRequest" name="SetDeviceAuthorizationsAsyncRequest">
-            </wsdl:input>
-            <wsdl:output message="tns:SetDeviceAuthorizationsResponse" name="SetDeviceAuthorizationsResponse">
             </wsdl:output>
         </wsdl:operation>
 
@@ -359,32 +318,7 @@
                 <soap:body use="literal" />
             </wsdl:output>      
         </wsdl:operation>
-
-        <wsdl:operation name="SetDeviceAuthorizations">
-            <soap:operation soapAction="" />            
-            <wsdl:input name="SetDeviceAuthorizationsRequest">
-                <soap:header message="tns:SetDeviceAuthorizationsHeader" part="OrganisationIdentification" use="literal" />
-                <soap:header message="tns:SetDeviceAuthorizationsHeader" part="UserName" use="literal" />
-                <soap:header message="tns:SetDeviceAuthorizationsHeader" part="ApplicationName" use="literal" />
-                <soap:body use="literal" />
-            </wsdl:input>
-            <wsdl:output name="SetDeviceAuthorizationsAsyncResponse">
-                <soap:body use="literal" />
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="GetSetDeviceAuthorizationsResponse">
-            <soap:operation soapAction="" /> 
-            <wsdl:input name="SetDeviceAuthorizationsAsyncRequest">
-                <soap:header message="tns:SetDeviceAuthorizationsAsyncHeader" part="OrganisationIdentification" use="literal" />
-                <soap:header message="tns:SetDeviceAuthorizationsAsyncHeader" part="UserName" use="literal" />
-                <soap:header message="tns:SetDeviceAuthorizationsAsyncHeader" part="ApplicationName" use="literal" />
-                <soap:body use="literal" />
-            </wsdl:input>
-            <wsdl:output name="SetDeviceAuthorizationsResponse">
-                <soap:body use="literal" />
-            </wsdl:output>      
-        </wsdl:operation>
-
+        
         <wsdl:operation name="FindAllOrganisations">
             <soap:operation soapAction="" />
             <wsdl:input name="FindAllOrganisationsRequest">
