@@ -42,4 +42,9 @@ public class RtuDevice extends Device {
         final RtuDevice device = (RtuDevice) o;
         return Objects.equals(this.deviceIdentification, device.deviceIdentification);
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.deviceIdentification);
+    }
 }
