@@ -8,6 +8,7 @@
 package com.alliander.osgp.domain.microgrids.entities;
 
 import java.util.Date;
+import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -28,5 +29,17 @@ public class RtuDevice extends Device {
 
     public Date getLastCommunicationTime() {
         return this.lastCommunicationTime;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        final RtuDevice device = (RtuDevice) o;
+        return Objects.equals(this.deviceIdentification, device.deviceIdentification);
     }
 }
