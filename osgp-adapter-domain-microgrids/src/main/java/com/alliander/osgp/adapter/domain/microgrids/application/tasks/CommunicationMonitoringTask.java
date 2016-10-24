@@ -32,7 +32,10 @@ public class CommunicationMonitoringTask implements Runnable {
     private TaskRepository taskRepository;
 
     @Autowired
-    private Integer maxAllowedTimeWithoutCommunication;
+    private Integer minimumTimeBetweenRuns;
+
+    @Autowired
+    private Integer maximumTimeWithoutCommunication;
 
     @Override
     public void run() {
@@ -47,16 +50,17 @@ public class CommunicationMonitoringTask implements Runnable {
 
         if (this.taskAlreadyRan(task)) {
             LOGGER.info(
-                    "Communication Monitoring Task already ran within maximum allowed interval. Skipping this run.");
+                    "Communication Monitoring Task already ran within minimum time between runs. Skipping this run.");
             return;
         }
 
         task = this.startTask(task);
 
         final List<RtuDevice> rtuDevices = this.loadDevices(task);
+        LOGGER.info("Found {} device(s) for which communication should be restored.", rtuDevices.size());
 
         for (final RtuDevice rtu : rtuDevices) {
-            LOGGER.debug("Restoring communication for device {}", rtu.getDeviceIdentification());
+            LOGGER.debug("Restoring communication for device {}.", rtu.getDeviceIdentification());
 
             this.communicationRecoveryService.restoreCommunication(rtu);
         }
@@ -87,15 +91,15 @@ public class CommunicationMonitoringTask implements Runnable {
     }
 
     private boolean taskAlreadyRan(final Task task) {
-        LOGGER.debug("Checking if task has already ran within maximum allowed time.");
+        LOGGER.debug("Checking if task has already ran within minimum time between runs.");
 
-        if (task.getStartTime() == null) {
+        if (task.getEndTime() == null) {
             return false;
         }
 
         final DateTime now = DateTime.now();
-        final DateTime taskStartTime = new DateTime(task.getStartTime());
-        return (now.plusSeconds(10)).isBefore(taskStartTime.plusMinutes(this.maxAllowedTimeWithoutCommunication));
+        final DateTime taskEndTime = new DateTime(task.getEndTime());
+        return now.isBefore(taskEndTime.plusMinutes(this.minimumTimeBetweenRuns));
     }
 
     private Task startTask(final Task task) {
@@ -113,7 +117,7 @@ public class CommunicationMonitoringTask implements Runnable {
     private List<RtuDevice> loadDevices(final Task task) {
         LOGGER.debug("Loading devices from repository for which communication should be restored.");
         final DateTime lastCommunicationTime = new DateTime(task.getStartTime())
-                .minusMinutes(this.maxAllowedTimeWithoutCommunication);
+                .minusMinutes(this.maximumTimeWithoutCommunication);
         return this.rtuDeviceRepository.findByIsActiveAndLastCommunicationTimeBefore(true,
                 lastCommunicationTime.toDate());
     }
