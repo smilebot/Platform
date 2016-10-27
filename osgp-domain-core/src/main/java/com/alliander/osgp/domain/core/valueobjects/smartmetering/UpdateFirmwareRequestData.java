@@ -12,9 +12,15 @@ package com.alliander.osgp.domain.core.valueobjects.smartmetering;
 import com.alliander.osgp.domain.core.valueobjects.DeviceFunction;
 import com.alliander.osgp.shared.exceptionhandling.FunctionalException;
 
-public class GetAssociationLnObjectsRequestData implements ActionRequest {
+public class UpdateFirmwareRequestData implements ActionRequest {
 
-    private static final long serialVersionUID = -8922779470252879265L;
+    private static final long serialVersionUID = 5044944004218551417L;
+
+    private String firmwareIdentification;
+
+    public UpdateFirmwareRequestData(final String firmwareIdentification) {
+        this.firmwareIdentification = firmwareIdentification;
+    }
 
     @Override
     public void validate() throws FunctionalException {
@@ -22,8 +28,12 @@ public class GetAssociationLnObjectsRequestData implements ActionRequest {
 
     }
 
+    public String getFirmwareIdentification() {
+        return this.firmwareIdentification;
+    }
+
     @Override
     public DeviceFunction getDeviceFunction() {
-        return DeviceFunction.GET_ASSOCIATION_LN_OBJECTS;
+        return DeviceFunction.UPDATE_FIRMWARE;
     }
 }
