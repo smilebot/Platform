@@ -20,7 +20,7 @@
   <parent>
     <groupId>com.alliander.osgp</groupId>
     <artifactId>parent-platform</artifactId>
-    <version>4.1.0</version>
+    <version>4.2.0</version>
     <relativePath>../parent-platform/pom.xml</relativePath>
   </parent>
 
@@ -189,5 +189,12 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <scope>test</scope>
+      <version>1.9.5</version>
+    </dependency>
+    
   </dependencies>
 </project>
