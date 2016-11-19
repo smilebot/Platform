@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Smart Society Services B.V.
+ * Copyright 2016 Smart Society Services B.V.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.  You may obtain a copy of the License at
  *
@@ -10,7 +10,6 @@ package com.alliander.osgp.adapter.domain.microgrids.application.config;
 import java.util.Properties;
 
 import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
 import javax.sql.DataSource;
 
 import org.hibernate.ejb.HibernatePersistence;
@@ -19,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
+import org.springframework.context.annotation.PropertySources;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -27,17 +26,20 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import com.alliander.osgp.domain.core.exceptions.PlatformException;
 import com.alliander.osgp.domain.core.repositories.DeviceRepository;
 import com.alliander.osgp.domain.microgrids.repositories.RtuDeviceRepository;
+import com.alliander.osgp.shared.application.config.AbstractConfig;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
-@EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", basePackageClasses = {
-        RtuDeviceRepository.class, DeviceRepository.class })
+@EnableJpaRepositories(basePackageClasses = { RtuDeviceRepository.class,
+        DeviceRepository.class }, entityManagerFactoryRef = "entityManagerFactory")
 @Configuration
-@PropertySource("file:${osp/osgpAdapterDomainMicrogrids/config}")
-public class PersistenceConfig {
+@PropertySources({ @PropertySource("classpath:osgp-adapter-domain-microgrids.properties"),
+        @PropertySource(value = "file:${osgp/Global/config}", ignoreResourceNotFound = true),
+        @PropertySource(value = "file:${osgp/AdapterDomainMicrogrids/config}", ignoreResourceNotFound = true), })
+public class PersistenceConfig extends AbstractConfig {
 
     private static final String PROPERTY_NAME_DATABASE_DRIVER = "db.driver";
-    private static final String PROPERTY_NAME_DATABASE_PASSWORD = "db.password";
+    private static final String PROPERTY_NAME_DATABASE_PW = "db.password";
     private static final String PROPERTY_NAME_DATABASE_URL = "db.url";
     private static final String PROPERTY_NAME_DATABASE_USERNAME = "db.username";
 
@@ -53,9 +55,6 @@ public class PersistenceConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PersistenceConfig.class);
 
-    @Resource
-    private Environment environment;
-
     private HikariDataSource dataSource;
 
     /**
@@ -70,7 +69,7 @@ public class PersistenceConfig {
             hikariConfig.setDriverClassName(this.environment.getRequiredProperty(PROPERTY_NAME_DATABASE_DRIVER));
             hikariConfig.setJdbcUrl(this.environment.getRequiredProperty(PROPERTY_NAME_DATABASE_URL));
             hikariConfig.setUsername(this.environment.getRequiredProperty(PROPERTY_NAME_DATABASE_USERNAME));
-            hikariConfig.setPassword(this.environment.getRequiredProperty(PROPERTY_NAME_DATABASE_PASSWORD));
+            hikariConfig.setPassword(this.environment.getRequiredProperty(PROPERTY_NAME_DATABASE_PW));
 
             hikariConfig.setMaximumPoolSize(
                     Integer.parseInt(this.environment.getRequiredProperty(PROPERTY_NAME_DATABASE_MAX_POOL_SIZE)));
