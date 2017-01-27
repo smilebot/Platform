@@ -70,7 +70,6 @@ public class DeviceInstallationMapper extends ConfigurableMapper {
                         source.getContainerMunicipality(), source.getGpsLatitude(), source.getGpsLongitude());
                 destination.setDeviceModel(
                         this.writableDeviceModelRepository.findByModelCode(source.getDeviceModel().getModelCode()));
-                destination.setActivated(source.isActivated());
 
                 return destination;
             }
