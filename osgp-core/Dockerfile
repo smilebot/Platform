@@ -1,6 +1,12 @@
 FROM tomcat:7.0.73-jre8-alpine
 
-MAINTAINER smart society services
+LABEL maintainer "info@smartsocietyservices.com"
+
+ENV JAVA_OPTS="-server \
+      -Xms128M \
+      -Xmx512M \
+      -Djava.awt.headless=true \
+      -XX:HeapDumpPath=/usr/local/tomcat/logs/java_heapdump_pid_%p.log"
 
 ADD target/*.war /usr/local/tomcat/webapps
 
