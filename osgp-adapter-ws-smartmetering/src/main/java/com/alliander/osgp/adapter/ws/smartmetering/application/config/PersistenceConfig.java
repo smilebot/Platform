@@ -71,7 +71,7 @@ public class PersistenceConfig extends AbstractConfig {
      *
      * @return DataSource
      */
-    public DataSource dataSource() {
+    public DataSource getDataSource() {
         if (this.dataSource == null) {
             final HikariConfig hikariConfig = new HikariConfig();
 
@@ -79,6 +79,7 @@ public class PersistenceConfig extends AbstractConfig {
             hikariConfig.setJdbcUrl(this.environment.getRequiredProperty(PROPERTY_NAME_DATABASE_URL));
             hikariConfig.setUsername(this.environment.getRequiredProperty(PROPERTY_NAME_DATABASE_USERNAME));
             hikariConfig.setPassword(this.environment.getRequiredProperty(PROPERTY_NAME_DATABASE_PASSWORD));
+            hikariConfig.setMinimumIdle(2);
 
             hikariConfig.setMaximumPoolSize(Integer.parseInt(this.environment
                     .getRequiredProperty(PROPERTY_NAME_DATABASE_MAX_POOL_SIZE)));
@@ -118,7 +119,7 @@ public class PersistenceConfig extends AbstractConfig {
         flyway.setInitOnMigrate(Boolean.parseBoolean(this.environment
                 .getRequiredProperty(PROPERTY_NAME_FLYWAY_INIT_ON_MIGRATE)));
 
-        flyway.setDataSource(this.dataSource());
+        flyway.setDataSource(this.getDataSource());
 
         return flyway;
     }
@@ -136,7 +137,7 @@ public class PersistenceConfig extends AbstractConfig {
         final LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
 
         entityManagerFactoryBean.setPersistenceUnitName("OSGP_ADAPTER_WS_SMARTMETERING");
-        entityManagerFactoryBean.setDataSource(this.dataSource());
+        entityManagerFactoryBean.setDataSource(this.getDataSource());
         entityManagerFactoryBean.setPackagesToScan(this.environment
                 .getRequiredProperty(PROPERTY_NAME_ENTITYMANAGER_PACKAGES_TO_SCAN));
         entityManagerFactoryBean.setPersistenceProviderClass(HibernatePersistence.class);
