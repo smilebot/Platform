@@ -14,6 +14,8 @@ import javax.sql.DataSource;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.hibernate.ejb.HibernatePersistence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -60,6 +62,8 @@ public class PersistenceConfig extends AbstractConfig {
 
     private static final String PROPERTY_NAME_ENTITYMANAGER_PACKAGES_TO_SCAN = "entitymanager.packages.to.scan";
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(PersistenceConfig.class);
+
     private HikariDataSource dataSource;
 
     public PersistenceConfig() {
@@ -79,16 +83,16 @@ public class PersistenceConfig extends AbstractConfig {
             hikariConfig.setJdbcUrl(this.environment.getRequiredProperty(PROPERTY_NAME_DATABASE_URL));
             hikariConfig.setUsername(this.environment.getRequiredProperty(PROPERTY_NAME_DATABASE_USERNAME));
             hikariConfig.setPassword(this.environment.getRequiredProperty(PROPERTY_NAME_DATABASE_PASSWORD));
-            hikariConfig.setMinimumIdle(2);
+            hikariConfig.setMinimumIdle(1);
 
-            hikariConfig.setMaximumPoolSize(Integer.parseInt(this.environment
-                    .getRequiredProperty(PROPERTY_NAME_DATABASE_MAX_POOL_SIZE)));
+            hikariConfig.setMaximumPoolSize(1);
             hikariConfig.setAutoCommit(Boolean.parseBoolean(this.environment
                     .getRequiredProperty(PROPERTY_NAME_DATABASE_AUTO_COMMIT)));
 
+            LOGGER.info("Elkan: New datasource requested");
             this.dataSource = new HikariDataSource(hikariConfig);
         }
-
+        LOGGER.info("Elkan: Datasource requested");
         return this.dataSource;
     }
 
