@@ -11,17 +11,14 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import org.hibernate.ejb.HibernatePersistence;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -37,9 +34,9 @@ import com.googlecode.flyway.core.Flyway;
 @Configuration
 @EnableTransactionManagement()
 @PropertySources({
-	@PropertySource("classpath:osgp-adapter-ws-smartmetering.properties"),
-    @PropertySource(value = "file:${osgp/Global/config}", ignoreResourceNotFound = true),
-	@PropertySource(value = "file:${osgp/AdapterWsSmartMetering/config}", ignoreResourceNotFound = true),
+        @PropertySource("classpath:osgp-adapter-ws-smartmetering.properties"),
+        @PropertySource(value = "file:${osgp/Global/config}", ignoreResourceNotFound = true),
+        @PropertySource(value = "file:${osgp/AdapterWsSmartMetering/config}", ignoreResourceNotFound = true),
 })
 public class PersistenceConfig extends AbstractConfig {
 
@@ -47,9 +44,6 @@ public class PersistenceConfig extends AbstractConfig {
     private static final String PROPERTY_NAME_DATABASE_PASSWORD = "db.password";
     private static final String PROPERTY_NAME_DATABASE_URL = "db.url";
     private static final String PROPERTY_NAME_DATABASE_USERNAME = "db.username";
-
-    private static final String PROPERTY_NAME_DATABASE_MAX_POOL_SIZE = "db.max_pool_size";
-    private static final String PROPERTY_NAME_DATABASE_AUTO_COMMIT = "db.auto_commit";
 
     private static final String PROPERTY_NAME_HIBERNATE_DIALECT = "hibernate.dialect";
     private static final String PROPERTY_NAME_HIBERNATE_FORMAT_SQL = "hibernate.format_sql";
@@ -62,10 +56,6 @@ public class PersistenceConfig extends AbstractConfig {
 
     private static final String PROPERTY_NAME_ENTITYMANAGER_PACKAGES_TO_SCAN = "entitymanager.packages.to.scan";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PersistenceConfig.class);
-
-    private HikariDataSource dataSource;
-
     public PersistenceConfig() {
         // Empty default constructor
     }
@@ -76,24 +66,18 @@ public class PersistenceConfig extends AbstractConfig {
      * @return DataSource
      */
     public DataSource getDataSource() {
-        if (this.dataSource == null) {
-            final HikariConfig hikariConfig = new HikariConfig();
-
-            hikariConfig.setDriverClassName(this.environment.getRequiredProperty(PROPERTY_NAME_DATABASE_DRIVER));
-            hikariConfig.setJdbcUrl(this.environment.getRequiredProperty(PROPERTY_NAME_DATABASE_URL));
-            hikariConfig.setUsername(this.environment.getRequiredProperty(PROPERTY_NAME_DATABASE_USERNAME));
-            hikariConfig.setPassword(this.environment.getRequiredProperty(PROPERTY_NAME_DATABASE_PASSWORD));
-            hikariConfig.setMinimumIdle(1);
-
-            hikariConfig.setMaximumPoolSize(1);
-            hikariConfig.setAutoCommit(Boolean.parseBoolean(this.environment
-                    .getRequiredProperty(PROPERTY_NAME_DATABASE_AUTO_COMMIT)));
-
-            LOGGER.info("Elkan: New datasource requested");
-            this.dataSource = new HikariDataSource(hikariConfig);
-        }
-        LOGGER.info("Elkan: Datasource requested");
-        return this.dataSource;
+        final SingleConnectionDataSource singleConnectionDataSource = new SingleConnectionDataSource();
+        singleConnectionDataSource.setAutoCommit(false);
+        final Properties properties = new Properties();
+        properties.setProperty("socketTimeout", "0");
+        properties.setProperty("tcpKeepAlive", "true");
+        singleConnectionDataSource.setDriverClassName(this.environment
+                .getRequiredProperty(PROPERTY_NAME_DATABASE_DRIVER));
+        singleConnectionDataSource.setUrl(this.environment.getRequiredProperty(PROPERTY_NAME_DATABASE_URL));
+        singleConnectionDataSource.setUsername(this.environment.getRequiredProperty(PROPERTY_NAME_DATABASE_USERNAME));
+        singleConnectionDataSource.setPassword(this.environment.getRequiredProperty(PROPERTY_NAME_DATABASE_PASSWORD));
+        singleConnectionDataSource.setSuppressClose(true);
+        return singleConnectionDataSource;
     }
 
     /**
