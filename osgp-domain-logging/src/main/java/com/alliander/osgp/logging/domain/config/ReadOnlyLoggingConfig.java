@@ -41,6 +41,8 @@ public class ReadOnlyLoggingConfig extends AbstractCustomConfig {
 
     private static final String PROPERTY_NAME_DATABASE_MAX_POOL_SIZE = "db.readonly.max_pool_size";
     private static final String PROPERTY_NAME_DATABASE_AUTO_COMMIT = "db.readonly.auto_commit";
+    private static final String PROPERTY_NAME_DATABASE_MIN_POOL_SIZE = "db.readonly.min_pool_size";
+    private static final String PROPERTY_NAME_DATABASE_POOL_IDLE_TIMEOUT = "db.readonly.idle_timeout";
 
     private static final String PROPERTY_NAME_HIBERNATE_DIALECT = "hibernate.dialect";
     private static final String PROPERTY_NAME_HIBERNATE_FORMAT_SQL = "hibernate.format_sql";
@@ -77,6 +79,11 @@ public class ReadOnlyLoggingConfig extends AbstractCustomConfig {
             hikariConfig.setJdbcUrl(ENVIRONMENT.getRequiredProperty(PROPERTY_NAME_DATABASE_URL));
             hikariConfig.setUsername(ENVIRONMENT.getRequiredProperty(PROPERTY_NAME_DATABASE_USERNAME));
             hikariConfig.setPassword(ENVIRONMENT.getRequiredProperty(PROPERTY_NAME_DATABASE_PW));
+
+            hikariConfig.setMinimumIdle(Integer.parseInt(ENVIRONMENT
+                    .getRequiredProperty(PROPERTY_NAME_DATABASE_MIN_POOL_SIZE)));
+            hikariConfig.setIdleTimeout(Integer.parseInt(ENVIRONMENT
+                    .getRequiredProperty(PROPERTY_NAME_DATABASE_POOL_IDLE_TIMEOUT)));
 
             hikariConfig.setMaximumPoolSize(Integer.parseInt(ENVIRONMENT
                     .getRequiredProperty(PROPERTY_NAME_DATABASE_MAX_POOL_SIZE)));
