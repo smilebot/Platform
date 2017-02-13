@@ -16,10 +16,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.PropertySources;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
+
+import com.alliander.osgp.shared.application.config.AbstractConfig;
+import com.alliander.osgp.ws.publiclighting.config.PublicLightingWebServiceConfig;
 
 /**
  * An application context Java configuration class. The usage of Java
@@ -29,9 +33,12 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 @ComponentScan(basePackages = { "com.alliander.osgp.domain.core", "com.alliander.osgp.adapter.ws.publiclighting" })
 @EnableTransactionManagement()
 @ImportResource("classpath:applicationContext.xml")
-@Import({ MessagingConfig.class, PersistenceConfig.class, WebServiceConfig.class })
-@PropertySource("file:${osp/osgpAdapterWsPublicLighting/config}")
-public class ApplicationContext {
+@Import({ MessagingConfig.class, PersistenceConfig.class, WebServiceConfig.class,
+        PublicLightingWebServiceConfig.class })
+@PropertySources({ @PropertySource("classpath:osgp-adapter-ws-publiclighting.properties"),
+        @PropertySource(value = "file:${osgp/Global/config}", ignoreResourceNotFound = true),
+        @PropertySource(value = "file:${osgp/AdapterWsPublicLighting/config}", ignoreResourceNotFound = true), })
+public class ApplicationContext extends AbstractConfig {
 
     private static final String LOCAL_TIME_ZONE_IDENTIFIER = "Europe/Paris";
     private static final DateTimeZone LOCAL_TIME_ZONE = DateTimeZone.forID(LOCAL_TIME_ZONE_IDENTIFIER);

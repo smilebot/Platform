@@ -1,13 +1,11 @@
 /**
- * Copyright 2015 Smart Society Services B.V.
+ * Copyright 2016 Smart Society Services B.V.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.  You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 package com.alliander.osgp.adapter.domain.microgrids.application.config;
-
-import javax.annotation.Resource;
 
 import org.apache.activemq.RedeliveryPolicy;
 import org.apache.activemq.broker.region.policy.RedeliveryPolicyMap;
@@ -22,7 +20,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
+import org.springframework.context.annotation.PropertySources;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 
@@ -30,14 +28,16 @@ import com.alliander.osgp.adapter.domain.microgrids.infra.jms.core.OsgpCoreReque
 import com.alliander.osgp.adapter.domain.microgrids.infra.jms.core.OsgpCoreResponseMessageListener;
 import com.alliander.osgp.adapter.domain.microgrids.infra.jms.ws.WebServiceRequestMessageListener;
 import com.alliander.osgp.adapter.domain.microgrids.infra.jms.ws.WebServiceResponseMessageSender;
+import com.alliander.osgp.shared.application.config.AbstractConfig;
 
 /**
- * An application context Java configuration class. The usage of Java
- * configuration requires Spring Framework 3.0
+ * An application context Java configuration class.
  */
 @Configuration
-@PropertySource("file:${osp/osgpAdapterDomainMicrogrids/config}")
-public class MessagingConfig {
+@PropertySources({ @PropertySource("classpath:osgp-adapter-domain-microgrids.properties"),
+        @PropertySource(value = "file:${osgp/Global/config}", ignoreResourceNotFound = true),
+        @PropertySource(value = "file:${osgp/AdapterDomainMicrogrids/config}", ignoreResourceNotFound = true), })
+public class MessagingConfig extends AbstractConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MessagingConfig.class);
 
@@ -124,9 +124,6 @@ public class MessagingConfig {
     private static final String PROPERTY_NAME_JMS_OUTGOING_OSGP_CORE_RESPONSES_REDELIVERY_DELAY = "jms.outgoing.osgp.core.responses.redelivery.delay";
     private static final String PROPERTY_NAME_JMS_OUTGOING_OSGP_CORE_RESPONSES_BACK_OFF_MULTIPLIER = "jms.outgoing.osgp.core.responses.back.off.multiplier";
     private static final String PROPERTY_NAME_JMS_OUTGOING_OSGP_CORE_RESPONSES_USE_EXPONENTIAL_BACK_OFF = "jms.outgoing.osgp.core.responses.use.exponential.back.off";
-
-    @Resource
-    private Environment environment;
 
     @Autowired
     @Qualifier("domainMicrogridsIncomingWebServiceRequestMessageListener")

@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Smart Society Services B.V.
+ * Copyright 2016 Smart Society Services B.V.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.  You may obtain a copy of the License at
  *
@@ -7,18 +7,19 @@
  */
 package com.alliander.osgp.adapter.ws.microgrids.application.config;
 
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import javax.annotation.Resource;
-
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
+import org.springframework.context.annotation.PropertySources;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.ws.server.endpoint.adapter.DefaultMethodEndpointAdapter;
 import org.springframework.ws.server.endpoint.adapter.method.MarshallingPayloadMethodProcessor;
@@ -34,12 +35,18 @@ import com.alliander.osgp.adapter.ws.endpointinterceptors.WebServiceMonitorInter
 import com.alliander.osgp.adapter.ws.endpointinterceptors.X509CertificateRdnAttributeValueEndpointInterceptor;
 import com.alliander.osgp.adapter.ws.microgrids.application.exceptionhandling.DetailSoapFaultMappingExceptionResolver;
 import com.alliander.osgp.adapter.ws.microgrids.application.exceptionhandling.SoapFaultMapper;
+import com.alliander.osgp.adapter.ws.microgrids.application.services.NotificationService;
+import com.alliander.osgp.adapter.ws.microgrids.application.services.NotificationServiceBlackHole;
+import com.alliander.osgp.adapter.ws.microgrids.application.services.NotificationServiceWs;
 import com.alliander.osgp.adapter.ws.microgrids.presentation.ws.SendNotificationServiceClient;
 import com.alliander.osgp.adapter.ws.microgrids.presentation.ws.WebServiceTemplateFactory;
+import com.alliander.osgp.shared.application.config.AbstractConfig;
 
 @Configuration
-@PropertySource("file:${osp/osgpAdapterWsMicrogrids/config}")
-public class WebServiceConfig {
+@PropertySources({ @PropertySource("classpath:osgp-adapter-ws-microgrids.properties"),
+        @PropertySource(value = "file:${osgp/Global/config}", ignoreResourceNotFound = true),
+        @PropertySource(value = "file:${osgp/AdapterWsMicrogrids/config}", ignoreResourceNotFound = true), })
+public class WebServiceConfig extends AbstractConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebServiceConfig.class);
 
@@ -56,12 +63,16 @@ public class WebServiceConfig {
     private static final String X509_RDN_ATTRIBUTE_ID = "cn";
     private static final String X509_RDN_ATTRIBUTE_VALUE_CONTEXT_PROPERTY_NAME = "CommonNameSet";
 
-    private static final String WEB_SERVICE_NOTIFICATION_URL_PROPERTY_NAME = "web.service.notification.url";
+    @Value("${web.service.notification.enabled}")
+    private boolean webserviceNotificationEnabled;
+
+    @Value("${web.service.notification.url:#{null}}")
+    private String webserviceNotificationUrl;
+
+    @Value("${web.service.notification.username:#{null}}")
+    private String webserviceNotificationUsername;
 
     private static final String SERVER = "SERVER";
-
-    @Resource
-    private Environment environment;
 
     // === MICROGRIDS MARSHALLERS ===
 
@@ -181,8 +192,13 @@ public class WebServiceConfig {
     }
 
     @Bean
-    public String notificationURL() {
-        return this.environment.getRequiredProperty(WEB_SERVICE_NOTIFICATION_URL_PROPERTY_NAME);
+    public NotificationService wsSmartMeteringNotificationService() throws GeneralSecurityException {
+        if (this.webserviceNotificationEnabled && !StringUtils.isEmpty(this.webserviceNotificationUrl)) {
+            return new NotificationServiceWs(this.sendNotificationServiceClient(), this.webserviceNotificationUrl,
+                    this.webserviceNotificationUsername);
+        } else {
+            return new NotificationServiceBlackHole();
+        }
     }
 
     @Bean

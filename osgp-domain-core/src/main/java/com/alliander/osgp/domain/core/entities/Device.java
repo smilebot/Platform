@@ -165,7 +165,7 @@ public class Device implements Serializable {
      * more { @see DeviceFunctionGroup.class }.
      */
     @OneToMany(mappedBy = "device", targetEntity = DeviceAuthorization.class, fetch = FetchType.EAGER)
-    protected final List<DeviceAuthorization> authorizations = new ArrayList<DeviceAuthorization>();
+    protected final List<DeviceAuthorization> authorizations = new ArrayList<>();
 
     /**
      * Protocol information indicates which protocol this device is using.
@@ -191,7 +191,7 @@ public class Device implements Serializable {
      * List of organisations which are authorized to use this device.
      */
     @Transient
-    protected final List<String> organisations = new ArrayList<String>();
+    protected final List<String> organisations = new ArrayList<>();
 
     @ManyToOne()
     @JoinColumn()
@@ -228,7 +228,8 @@ public class Device implements Serializable {
         this.gpsLongitude = gpsLongitude;
     }
 
-    public DeviceAuthorization addAuthorization(final Organisation organisation, final DeviceFunctionGroup functionGroup) {
+    public DeviceAuthorization addAuthorization(final Organisation organisation,
+            final DeviceFunctionGroup functionGroup) {
         final DeviceAuthorization authorization = new DeviceAuthorization(this, organisation, functionGroup);
         this.authorizations.add(authorization);
         return authorization;
@@ -427,6 +428,10 @@ public class Device implements Serializable {
 
     public void updateInMaintenance(final boolean inMaintenance) {
         this.inMaintenance = inMaintenance;
+    }
+
+    public void setAlias(final String alias) {
+        this.alias = alias;
     }
 
     public void updateMetaData(final String alias, final String containerCity, final String containerPostalCode,

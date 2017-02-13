@@ -20,8 +20,16 @@ public class RtuDevice extends Device {
 
     private static final long serialVersionUID = -5356111084356341244L;
 
-    @Column
+    @Column(insertable = false)
     private Date lastCommunicationTime;
+
+    public RtuDevice() {
+        // No-arg constructor for frameworks.
+    }
+
+    public RtuDevice(final String deviceIdentification) {
+        super(deviceIdentification);
+    }
 
     public void messageReceived() {
         this.lastCommunicationTime = new Date();

@@ -9,7 +9,7 @@ package com.alliander.osgp.domain.microgrids.valueobjects;
 
 import java.io.Serializable;
 
-public class MeasurementFilter extends MeasurementIdentifier implements Serializable {
+public class MeasurementFilter extends NodeIdentifier implements Serializable {
 
     private static final long serialVersionUID = -5169545289993816729L;
 
