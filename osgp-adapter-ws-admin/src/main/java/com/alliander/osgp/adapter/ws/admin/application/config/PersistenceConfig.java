@@ -43,8 +43,10 @@ public class PersistenceConfig extends AbstractConfig {
     private static final String PROPERTY_NAME_DATABASE_URL = "db.url";
     private static final String PROPERTY_NAME_DATABASE_USERNAME = "db.username";
 
+    private static final String PROPERTY_NAME_DATABASE_MIN_POOL_SIZE = "db.min_pool_size";
     private static final String PROPERTY_NAME_DATABASE_MAX_POOL_SIZE = "db.max_pool_size";
     private static final String PROPERTY_NAME_DATABASE_AUTO_COMMIT = "db.auto_commit";
+    private static final String PROPERTY_NAME_DATABASE_POOL_IDLE_TIMEOUT = "db.idle_timeout";
 
     private static final String PROPERTY_NAME_HIBERNATE_DIALECT = "hibernate.dialect";
     private static final String PROPERTY_NAME_HIBERNATE_FORMAT_SQL = "hibernate.format_sql";
@@ -71,6 +73,11 @@ public class PersistenceConfig extends AbstractConfig {
             hikariConfig.setJdbcUrl(this.environment.getRequiredProperty(PROPERTY_NAME_DATABASE_URL));
             hikariConfig.setUsername(this.environment.getRequiredProperty(PROPERTY_NAME_DATABASE_USERNAME));
             hikariConfig.setPassword(this.environment.getRequiredProperty(PROPERTY_NAME_DATABASE_PASSWORD));
+
+            hikariConfig.setMinimumIdle(Integer.parseInt(this.environment
+                    .getRequiredProperty(PROPERTY_NAME_DATABASE_MIN_POOL_SIZE)));
+            hikariConfig.setIdleTimeout(Integer.parseInt(this.environment
+                    .getRequiredProperty(PROPERTY_NAME_DATABASE_POOL_IDLE_TIMEOUT)));
 
             hikariConfig.setMaximumPoolSize(Integer.parseInt(this.environment
                     .getRequiredProperty(PROPERTY_NAME_DATABASE_MAX_POOL_SIZE)));
