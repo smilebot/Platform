@@ -1,4 +1,5 @@
 FROM tomcat:7.0.73-jre8-alpine
+ENV JAVA_OPTS="-Xms256m -Xmx768m"
 
 MAINTAINER smart society services
 
