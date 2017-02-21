@@ -7,6 +7,7 @@
  */
 package com.alliander.osgp.core.application.config;
 
+import org.apache.activemq.ActiveMQPrefetchPolicy;
 import org.apache.activemq.RedeliveryPolicy;
 import org.apache.activemq.broker.region.policy.RedeliveryPolicyMap;
 import org.apache.activemq.pool.PooledConnectionFactory;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -68,6 +70,9 @@ public class ProtocolMessagingConfig extends AbstractConfig {
 
     private static final String PROPERTY_NAME_MAX_RETRY_COUNT = "max.retry.count";
 
+    @Value("${jms.activemq.connection.queue.prefetch:1000}")
+    protected int queuePrefetch;
+
     @Autowired
     private DomainInfoRepository domainInfoRepository;
 
@@ -93,12 +98,16 @@ public class ProtocolMessagingConfig extends AbstractConfig {
     public ActiveMQConnectionFactory protocolConnectionFactory() {
         LOGGER.debug("Creating bean: connectionFactory");
 
+        final ActiveMQPrefetchPolicy activeMQPrefetchPolicy = new ActiveMQPrefetchPolicy();
+        activeMQPrefetchPolicy.setQueuePrefetch(this.queuePrefetch);
+
         final ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory();
         activeMQConnectionFactory.setRedeliveryPolicyMap(this.protocolRedeliveryPolicyMap());
         activeMQConnectionFactory.setBrokerURL(this.environment
                 .getRequiredProperty(PROPERTY_NAME_JMS_ACTIVEMQ_BROKER_URL));
 
         activeMQConnectionFactory.setNonBlockingRedelivery(true);
+        activeMQConnectionFactory.setPrefetchPolicy(activeMQPrefetchPolicy);
 
         return activeMQConnectionFactory;
     }

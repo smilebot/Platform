@@ -7,6 +7,7 @@
  */
 package com.alliander.osgp.adapter.domain.core.application.config;
 
+import org.apache.activemq.ActiveMQPrefetchPolicy;
 import org.apache.activemq.RedeliveryPolicy;
 import org.apache.activemq.broker.region.policy.RedeliveryPolicyMap;
 import org.apache.activemq.command.ActiveMQDestination;
@@ -15,6 +16,7 @@ import org.apache.activemq.pool.PooledConnectionFactory;
 import org.apache.activemq.spring.ActiveMQConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -131,6 +133,9 @@ public class MessagingConfig extends AbstractConfig {
     @Qualifier("domainCoreIncomingOsgpCoreRequestsMessageListener")
     private OsgpCoreRequestMessageListener osgpCoreRequestMessageListener;
 
+    @Value("${jms.activemq.connection.queue.prefetch:1000}")
+    protected int queuePrefetch;
+
     // === JMS SETTINGS ===
 
     @Bean(destroyMethod = "stop")
@@ -142,12 +147,16 @@ public class MessagingConfig extends AbstractConfig {
 
     @Bean
     public ActiveMQConnectionFactory connectionFactory() {
+        final ActiveMQPrefetchPolicy activeMQPrefetchPolicy = new ActiveMQPrefetchPolicy();
+        activeMQPrefetchPolicy.setQueuePrefetch(this.queuePrefetch);
+
         final ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory();
         activeMQConnectionFactory.setRedeliveryPolicyMap(this.redeliveryPolicyMap());
         activeMQConnectionFactory.setBrokerURL(this.environment
                 .getRequiredProperty(PROPERTY_NAME_JMS_ACTIVEMQ_BROKER_URL));
 
         activeMQConnectionFactory.setNonBlockingRedelivery(true);
+        activeMQConnectionFactory.setPrefetchPolicy(activeMQPrefetchPolicy);
 
         return activeMQConnectionFactory;
     }

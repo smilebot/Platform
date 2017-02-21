@@ -7,6 +7,7 @@
  */
 package com.alliander.osgp.core.application.config;
 
+import org.apache.activemq.ActiveMQPrefetchPolicy;
 import org.apache.activemq.RedeliveryPolicy;
 import org.apache.activemq.broker.region.policy.RedeliveryPolicyMap;
 import org.apache.activemq.pool.PooledConnectionFactory;
@@ -14,6 +15,7 @@ import org.apache.activemq.spring.ActiveMQConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -72,6 +74,9 @@ public class DomainMessagingConfig extends AbstractConfig {
     @Autowired
     private ProtocolInfoRepository protocolInfoRepository;
 
+    @Value("${jms.activemq.connection.queue.prefetch:1000}")
+    protected int queuePrefetch;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(DomainMessagingConfig.class);
 
     @Bean(destroyMethod = "stop")
@@ -86,12 +91,15 @@ public class DomainMessagingConfig extends AbstractConfig {
     @Bean
     public ActiveMQConnectionFactory domainConnectionFactory() {
         LOGGER.debug("Creating bean: connectionFactory");
+        final ActiveMQPrefetchPolicy activeMQPrefetchPolicy = new ActiveMQPrefetchPolicy();
+        activeMQPrefetchPolicy.setQueuePrefetch(this.queuePrefetch);
 
         final ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory();
         activeMQConnectionFactory.setRedeliveryPolicyMap(this.domainRedeliveryPolicyMap());
         activeMQConnectionFactory.setBrokerURL(this.environment.getRequiredProperty(PROPERTY_NAME_JMS_ACTIVEMQ_BROKER_URL));
 
         activeMQConnectionFactory.setNonBlockingRedelivery(true);
+        activeMQConnectionFactory.setPrefetchPolicy(activeMQPrefetchPolicy);
 
         return activeMQConnectionFactory;
     }
