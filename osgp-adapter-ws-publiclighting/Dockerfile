@@ -9,6 +9,6 @@ ADD https://jdbc.postgresql.org/download/postgresql-9.4.1212.jar /usr/local/tomc
 ADD https://github.com/OSGP/Config/raw/development/certificates/osgp-ca/certs/LianderNetManagement.pfx /etc/ssl/certs
 ADD https://github.com/OSGP/Config/raw/development/certificates/osgp-ca/certs/test-org.pfx /etc/ssl/certs
 
-RUN sed -i 's@<Connector port="8009" protocol="AJP/1.3" redirectPort="8443" />@<Connector port="8009" protocol="AJP/1.3" redirectPort="8443" maxThreads="10000" maxConnections="8000" minSpareThreads="100" maxIdleTime="5000" />@' /usr/local/tomcat/conf/server.xml
+RUN sed -i 's@<Connector port="8009" protocol="AJP/1.3" redirectPort="8443" />@<Connector port="8009" protocol="AJP/1.3" acceptorThreadCount="3" redirectPort="8443" maxThreads="10000" maxConnections="8000" minSpareThreads="100" maxIdleTime="5000" />@' /usr/local/tomcat/conf/server.xml
 
 CMD ["catalina.sh", "run"]
