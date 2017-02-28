@@ -8,6 +8,7 @@
 package com.alliander.osgp.adapter.domain.smartmetering.application.mapping;
 
 import ma.glasnost.orika.MapperFactory;
+import ma.glasnost.orika.converter.builtin.DateAndTimeConverters.DateToXmlGregorianCalendarConverter;
 import ma.glasnost.orika.impl.ConfigurableMapper;
 
 import org.springframework.stereotype.Component;
@@ -23,7 +24,8 @@ public class MonitoringMapper extends ConfigurableMapper {
         // never be attempted without using this converter!
         mapperFactory.getConverterFactory().registerConverter(new DlmsMeterValueConverter());
         mapperFactory.getConverterFactory().registerConverter(new ReadAlarmRegisterDataConverter());
-
+        mapperFactory.getConverterFactory().registerConverter(new ProfileEntryValueConverter());
+        mapperFactory.getConverterFactory().registerConverter(new DateToXmlGregorianCalendarConverter());
     }
 
 }
