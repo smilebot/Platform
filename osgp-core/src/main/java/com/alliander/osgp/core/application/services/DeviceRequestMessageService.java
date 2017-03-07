@@ -52,6 +52,7 @@ public class DeviceRequestMessageService {
             final Device device = this.domainHelperService.findDevice(message.getDeviceIdentification());
             duration = (System.nanoTime() - startTime);  //divide by 1000000 to get milliseconds.
             LOGGER.info("Elkan: found device in {} ns, {} ms", duration, duration / 1000000);
+            startTime = System.nanoTime();
 
             final ProtocolInfo protocolInfo;
             if (device.getGatewayDevice() == null) {
@@ -59,8 +60,9 @@ public class DeviceRequestMessageService {
             } else {
                 protocolInfo = device.getGatewayDevice().getProtocolInfo();
             }
-            duration = (System.nanoTime() - duration);  //divide by 1000000 to get milliseconds.
+            duration = (System.nanoTime() - startTime);  //divide by 1000000 to get milliseconds.
             LOGGER.info("Elkan: found protocolinfo in {} ns, {} ms", duration, duration / 1000000);
+            startTime = System.nanoTime();
 
             if (protocolInfo == null || !this.protocolRequestService.isSupported(protocolInfo)) {
                 if (protocolInfo == null) {
@@ -74,24 +76,27 @@ public class DeviceRequestMessageService {
                 throw new FunctionalException(FunctionalExceptionType.PROTOCOL_UNKNOWN_FOR_DEVICE,
                         ComponentType.OSGP_CORE);
             }
-            duration = (System.nanoTime() - duration);  //divide by 1000000 to get milliseconds.
+            duration = (System.nanoTime() - startTime);  //divide by 1000000 to get milliseconds.
             LOGGER.info("Elkan: Checked protocolinfo in {} ns, {} ms", duration, duration / 1000000);
+            startTime = System.nanoTime();
 
             LOGGER.info("Device is using protocol [{}] with version [{}]", protocolInfo.getProtocol(),
                     protocolInfo.getProtocolVersion());
 
             final Organisation organisation = this.domainHelperService.findOrganisation(message
                     .getOrganisationIdentification());
-            duration = (System.nanoTime() - duration);  //divide by 1000000 to get milliseconds.
+            duration = (System.nanoTime() - startTime);  //divide by 1000000 to get milliseconds.
             LOGGER.info("Elkan: found organisation in {} ns, {} ms", duration, duration / 1000000);
+            startTime = System.nanoTime();
 
             this.domainHelperService.isAllowed(organisation, device,
                     Enum.valueOf(DeviceFunction.class, message.getMessageType()));
-            duration = (System.nanoTime() - duration);  //divide by 1000000 to get milliseconds.
+            duration = (System.nanoTime() - startTime);  //divide by 1000000 to get milliseconds.
             LOGGER.info("Elkan: Verified protocolinfo in {} ns, {} ms", duration, duration / 1000000);
+            startTime = System.nanoTime();
 
             this.protocolRequestService.send(message, protocolInfo);
-            duration = (System.nanoTime() - duration);  //divide by 1000000 to get milliseconds.
+            duration = (System.nanoTime() - startTime);  //divide by 1000000 to get milliseconds.
             LOGGER.info("Elkan: Send message in {} ns, {} ms", duration, duration / 1000000);
 
         } catch (final FunctionalException e) {
