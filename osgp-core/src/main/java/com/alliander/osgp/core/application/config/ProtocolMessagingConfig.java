@@ -73,6 +73,13 @@ public class ProtocolMessagingConfig extends AbstractConfig {
     @Value("${jms.activemq.connection.queue.prefetch:1000}")
     protected int queuePrefetch;
 
+    @Value("${jms.activemq.connection.pool.size:10}")
+    protected int connectionPoolSize;
+
+    @Value("${jms.activemq.connection.pool.max.active.sessions:500}")
+    protected int maximumActiveSessionPerConnection;
+
+
     @Autowired
     private DomainInfoRepository domainInfoRepository;
 
@@ -91,6 +98,8 @@ public class ProtocolMessagingConfig extends AbstractConfig {
 
         final PooledConnectionFactory pooledConnectionFactory = new PooledConnectionFactory();
         pooledConnectionFactory.setConnectionFactory(this.protocolConnectionFactory());
+        pooledConnectionFactory.setMaxConnections(this.connectionPoolSize);
+        pooledConnectionFactory.setMaximumActiveSessionPerConnection(this.maximumActiveSessionPerConnection);
         return pooledConnectionFactory;
     }
 
