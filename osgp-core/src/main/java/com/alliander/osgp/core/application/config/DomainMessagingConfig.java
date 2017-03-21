@@ -150,6 +150,7 @@ public class DomainMessagingConfig extends AbstractConfig {
                 .getRequiredProperty(PROPERTY_NAME_JMS_INCOMING_DOMAIN_REQUESTS_CONCURRENT_CONSUMERS)));
         messageListenerContainer.setMaxConcurrentConsumers(Integer.parseInt(this.environment
                 .getRequiredProperty(PROPERTY_NAME_JMS_INCOMING_DOMAIN_REQUESTS_MAX_CONCURRENT_CONSUMERS)));
+        messageListenerContainer.setSessionTransacted(true);
 
         return messageListenerContainer;
     }
@@ -179,6 +180,7 @@ public class DomainMessagingConfig extends AbstractConfig {
                 .getRequiredProperty(PROPERTY_NAME_JMS_INCOMING_DOMAIN_RESPONSES_CONCURRENT_CONSUMERS)));
         messageListenerContainer.setMaxConcurrentConsumers(Integer.parseInt(this.environment
                 .getRequiredProperty(PROPERTY_NAME_JMS_INCOMING_DOMAIN_RESPONSES_MAX_CONCURRENT_CONSUMERS)));
+        messageListenerContainer.setSessionTransacted(true);
 
         return messageListenerContainer;
     }

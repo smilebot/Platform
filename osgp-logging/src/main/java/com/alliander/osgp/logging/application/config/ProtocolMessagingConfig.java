@@ -125,6 +125,7 @@ public class ProtocolMessagingConfig extends AbstractConfig {
                 .getRequiredProperty(PROPERTY_NAME_JMS_INCOMING_PROTOCOL_LOG_ITEM_REQUESTS_MAX_CONCURRENT_CONSUMERS)));
         messageListenerContainer.setMessageListener(this.protocolLogItemRequestMessageListener());
         messageListenerContainer.setSessionTransacted(true);
+        messageListenerContainer.setSessionTransacted(true);
         return messageListenerContainer;
     }
 
