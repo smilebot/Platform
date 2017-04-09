@@ -20,7 +20,7 @@
   <parent>
     <groupId>com.alliander.osgp</groupId>
     <artifactId>parent-platform</artifactId>
-    <version>4.8.0</version>
+    <version>4.9.0</version>
     <relativePath>../parent-platform/pom.xml</relativePath>
   </parent>
 
@@ -111,12 +111,6 @@
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-validator</artifactId>
-    </dependency>
-
-        <!-- Flyway (DB Migration) -->
-    <dependency>
-      <groupId>com.googlecode.flyway</groupId>
-      <artifactId>flyway-core</artifactId>
     </dependency>
 
         <!-- Logging -->

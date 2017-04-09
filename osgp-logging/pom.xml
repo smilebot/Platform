@@ -20,7 +20,7 @@
   <parent>
     <groupId>com.alliander.osgp</groupId>
     <artifactId>parent-platform</artifactId>
-    <version>4.8.0</version>
+    <version>4.9.0</version>
     <relativePath>../parent-platform/pom.xml</relativePath>
   </parent>
 
@@ -133,7 +133,7 @@
 
         <!-- Flyway (DB Migration) -->
     <dependency>
-      <groupId>com.googlecode.flyway</groupId>
+      <groupId>org.flywaydb</groupId>
       <artifactId>flyway-core</artifactId>
     </dependency>
 
